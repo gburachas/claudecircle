@@ -181,6 +181,7 @@ determine_next_start_container() {
     local path="$1" parent max idx name dir
     parent=$(get_parent_dir "$path")
     max=$(read_counter "$parent")
+    # echo "DEBUG: determine_next_start_container path=$path parent=$parent max=$max" >&2
     for ((idx=1; idx<=max; idx++)); do
         name=$(generate_container_name "$path" "$idx")
         dir="$parent/$name"

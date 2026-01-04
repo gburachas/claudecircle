@@ -83,7 +83,7 @@ if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
                     runuser -u DOCKERUSER -- touch "$VENV_FLAG"
                 else
                     # Someone else is fixing it, wait for completion
-                    local wait_count=0
+                    wait_count=0
                     while [ ! -f "$VENV_FLAG" ] && [ $wait_count -lt 60 ]; do
                         sleep 0.5
                         ((wait_count++)) || true
@@ -106,7 +106,7 @@ if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
                     runuser -u DOCKERUSER -- touch "$VENV_FLAG"
                 else
                     # Someone else is creating it, wait for completion flag
-                    local wait_count=0
+                    wait_count=0
                     while [ ! -f "$VENV_FLAG" ] && [ $wait_count -lt 60 ]; do
                         sleep 0.5
                         ((wait_count++)) || true
@@ -135,10 +135,10 @@ if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
         fi
 
         # Check if Python profile is added and deploy Python dev tools if needed
-        if [ -f "$CONFIG_FILE" ] && grep -qE 'python|ml|datascience' "$CONFIG_FILE"; then
+        if [ -f "$CONFIG_FILE" ] && grep -qE 'python|ml|datascience|agent' "$CONFIG_FILE"; then
             if [ ! -f "$PYDEV_FLAG" ] && [ -f "$VENV_FLAG" ] && [ -d "$VENV_DIR" ]; then
                 # Deploy Python dev tools based on profile
-                local python_packages=""
+                python_packages=""
                 
                 # Base Python profile packages
                 if grep -q 'python' "$CONFIG_FILE"; then
@@ -153,6 +153,11 @@ if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
                 # Data science profile packages
                 if grep -q 'datascience' "$CONFIG_FILE"; then
                     python_packages="$python_packages jupyter notebook jupyterlab numpy pandas scipy matplotlib seaborn scikit-learn statsmodels plotly"
+                fi
+                
+                # Agent profile packages
+                if grep -q 'agent' "$CONFIG_FILE"; then
+                    python_packages="$python_packages claude-agent-sdk"
                 fi
                 
                 # Remove duplicates and install
@@ -234,8 +239,15 @@ EOF
         sed -i "s|DOCKERUSER|$DOCKERUSER|g" /tmp/tmux-init.sh
         exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && cd /workspace && exec tmux new-session /tmp/tmux-init.sh"
     else
+
         # For non-tmux, show logo before starting shell
-        exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudebox/.venv ] && export PATH=\"/home/DOCKERUSER/.claudebox/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudebox/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null && logo_header 2>/dev/null; exec /bin/zsh"
+        if [[ $# -gt 0 ]]; then
+            # Execute provided command
+            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudebox/.venv ] && export PATH=\"/home/DOCKERUSER/.claudebox/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudebox/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null; exec \"\$@\"" -- "$@"
+        else
+            # Interactive shell
+            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudebox/.venv ] && export PATH=\"/home/DOCKERUSER/.claudebox/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudebox/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null && logo_header 2>/dev/null; exec /bin/zsh"
+        fi
     fi
 else
     # Claude mode - handle wrapper logic directly here

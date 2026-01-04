@@ -301,10 +301,10 @@ run_claudebox_container() {
                 rm -f "$file"
             fi
         done
-        if [[ -n "$user_mcp_file" ]] && [[ -f "$user_mcp_file" ]]; then
+        if [[ -n "${user_mcp_file:-}" ]] && [[ -f "${user_mcp_file:-}" ]]; then
             rm -f "$user_mcp_file"
         fi
-        if [[ -n "$project_mcp_file" ]] && [[ -f "$project_mcp_file" ]]; then
+        if [[ -n "${project_mcp_file:-}" ]] && [[ -f "${project_mcp_file:-}" ]]; then
             rm -f "$project_mcp_file"
         fi
     }
@@ -391,6 +391,22 @@ run_claudebox_container() {
         -e "CLAUDEBOX_WRAP_TMUX=${CLAUDEBOX_WRAP_TMUX:-false}"
         -e "CLAUDEBOX_PANE_NAME=${CLAUDEBOX_PANE_NAME:-}"
         -e "CLAUDEBOX_TMUX_PANE=${CLAUDEBOX_TMUX_PANE:-}"
+        # Agent SDK / Cloud Provider Support
+        -e "CLAUDE_CODE_USE_BEDROCK=${CLAUDE_CODE_USE_BEDROCK:-}"
+        -e "CLAUDE_CODE_USE_VERTEX=${CLAUDE_CODE_USE_VERTEX:-}"
+        -e "CLAUDE_CODE_USE_FOUNDRY=${CLAUDE_CODE_USE_FOUNDRY:-}"
+        # AWS Credentials
+        -e "AWS_PROFILE=${AWS_PROFILE:-}"
+        -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}"
+        -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}"
+        -e "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}"
+        -e "AWS_REGION=${AWS_REGION:-}"
+        # Google Cloud Credentials
+        -e "GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}"
+        -e "GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}"
+        # Azure / Foundry Credentials
+        -e "AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}"
+        -e "AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}"
         --cap-add NET_ADMIN
         --cap-add NET_RAW
         "$IMAGE_NAME"
