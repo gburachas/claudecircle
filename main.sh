@@ -324,8 +324,9 @@ main() {
         cmd_requirements="docker"
     fi
     
-    if [[ "$VERBOSE" == "true" ]]; then
+    if [[ "$VERBOSE" == "true" ]] || [[ "${DEBUG_CI:-false}" == "true" ]]; then
         echo "[DEBUG] Command requirements: $cmd_requirements" >&2
+        echo "[DEBUG] CLI_SCRIPT_COMMAND: $CLI_SCRIPT_COMMAND" >&2
     fi
     
     # Step 10a: Set IMAGE_NAME if needed (for "image" or "docker" requirements)

@@ -7,9 +7,10 @@
 # ============================================================================
 
 # Four flag buckets (Bash 3.2 compatible - no associative arrays)
-readonly HOST_ONLY_FLAGS=(--verbose rebuild)
-readonly CONTROL_FLAGS=(--enable-sudo --disable-firewall)
-readonly SCRIPT_COMMANDS=(shell create slot slots revoke profiles projects profile info help -h --help add remove install allowlist clean save project tmux kill)
+# Four flag buckets (Bash 3.2 compatible - no associative arrays)
+HOST_ONLY_FLAGS=(--verbose rebuild)
+CONTROL_FLAGS=(--enable-sudo --disable-firewall)
+SCRIPT_COMMANDS=(shell create slot slots revoke profiles projects profile info help -h --help add remove install allowlist clean save project tmux kill)
 
 # parse_cli_args - Central CLI parsing with four-bucket architecture
 # Usage: parse_cli_args "$@"
@@ -79,6 +80,13 @@ parse_cli_args() {
     CLI_PASS_THROUGH=("${pass_through[@]:-}")
     
     export CLI_SCRIPT_COMMAND
+    
+    # Debug output
+    if [[ "${VERBOSE:-false}" == "true" ]] || [[ "${DEBUG_CI:-false}" == "true" ]]; then
+        echo "[DEBUG] parse_cli_args input: $*" >&2
+        echo "[DEBUG] script_command: $script_command" >&2
+        echo "[DEBUG] found_script_command: $found_script_command" >&2
+    fi
 }
 
 # Process host-only flags and set environment variables
