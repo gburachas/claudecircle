@@ -29,7 +29,9 @@ jobs:
           export HOME="$TEST_HOME"
           echo "Testing installation in $HOME"
           bash ./claudecircle.run
-          ls -la ~/.claudecircle/scripts/bin/
+          bash ./claudecircle.run
+          ls -la ~/.claudecircle/source/
+          ~/.local/bin/claudecircle --help || echo "OK (help displayed or no version flag)"
           ~/.local/bin/claudecircle --help || echo "OK (help displayed or no version flag)"
 
       - name: Upload installer artifact
