@@ -7,15 +7,15 @@ show_welcome_screen() {
     echo
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                                                                               ║${NC}"
-    echo -e "${CYAN}║${NC}  ${WHITE}█▀▀ █   ▄▀█ █ █ █▀▄ █▀▀ █▄▄ █▀█ ▀▄▀${NC}   ${CYAN}Docker Environment for Claude CLI${NC}  ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}  ${WHITE}█▀▀ █   ▄▀█ █ █ █▀▄ █▀▀ █▄▄ █▀█ ▀▄▀${NC}   ${CYAN}Docker Environment for ClaudeCircle${NC}  ${CYAN}║${NC}"
     echo -e "${CYAN}║${NC}  ${WHITE}█▄▄ █▄▄ █▀█ █▄█ █▄▀ ██▄ █▄█ █▄█ █ █${NC}   ${DIM}Isolated • Secure • Powerful${NC}      ${CYAN}║${NC}"
     echo -e "${CYAN}║                                                                               ║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo
     
-    echo -e "${WHITE}  🎉 Welcome to ClaudeBox!${NC}"
+    echo -e "${WHITE}  🎉 Welcome to ClaudeCircle!${NC}"
     echo
-    echo -e "${DIM}  ClaudeBox provides a secure, containerized environment for running Claude CLI${NC}"
+    echo -e "${DIM}  ClaudeCircle provides a secure, containerized environment for running Claude CLI${NC}"
     echo -e "${DIM}  with full development tooling and network isolation.${NC}"
     echo
     
@@ -46,7 +46,7 @@ show_welcome_screen() {
 show_building_screen() {
     echo
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}                          ${WHITE}Building ClaudeBox Image${NC}                            ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}                          ${WHITE}Building ClaudeCircle Image${NC}                            ${CYAN}║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo
     echo -e "${WHITE}  📦 Setting up your development environment...${NC}"
@@ -70,12 +70,12 @@ show_next_steps() {
     echo -e "${DIM}  ────────────────────────────────────────────────────────────────────────────${NC}"
     echo
     echo -e "     ${WHITE}1.${NC} Create an authenticated slot:"
-    echo -e "        ${GREEN}claudebox create${NC}"
+    echo -e "        ${GREEN}claudecircle create${NC}"
     echo
     echo -e "     ${WHITE}2.${NC} Or explore available options:"
-    echo -e "        ${GREEN}claudebox help${NC}"
+    echo -e "        ${GREEN}claudecircle help${NC}"
     echo
-    echo -e "${DIM}  For more information, visit: https://github.com/RchGrav/claudebox${NC}"
+    echo -e "${DIM}  For more information, visit: https://github.com/RchGrav/claudecircle${NC}"
     echo
 }
 

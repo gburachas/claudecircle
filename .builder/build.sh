@@ -1,17 +1,17 @@
 #!/bin/bash
-# Build the ClaudeBox self-extracting installer script
-# Packages entire repo for extraction to ~/.claudebox/
+# Build the ClaudeCircle self-extracting installer script
+# Packages entire repo for extraction to ~/.claudecircle/
 
 set -euo pipefail
 
 # Get version from main.sh
-VERSION=$(grep -m1 'readonly CLAUDEBOX_VERSION=' main.sh | cut -d'"' -f2)
+VERSION=$(grep -m1 'readonly CLAUDECIRCLE_VERSION=' main.sh | cut -d'"' -f2)
 if [[ -z "$VERSION" ]]; then
   echo "❌ Could not extract version from main.sh" >&2
   exit 1
 fi
 
-echo "🔨 Building ClaudeBox v$VERSION"
+echo "🔨 Building ClaudeCircle v$VERSION"
 
 # Clean dist directory
 echo "🧹 Cleaning dist directory..."
@@ -19,11 +19,11 @@ rm -rf dist
 mkdir -p dist
 
 TEMPLATE=".builder/script_template_root.sh"
-OUTPUT="dist/claudebox.run"
-ARCHIVE="dist/claudebox-${VERSION}.tar.gz"
+OUTPUT="dist/claudecircle.run"
+ARCHIVE="dist/claudecircle-${VERSION}.tar.gz"
 
 # Create archive in temp location to avoid "file changed as we read it" error
-TEMP_ARCHIVE="/tmp/claudebox_archive_$$.tar.gz"
+TEMP_ARCHIVE="/tmp/claudecircle_archive_$$.tar.gz"
 
 # Create archive of entire repo (excluding hidden files and build output)
 echo "📦 Creating archive..."
@@ -37,7 +37,7 @@ tar -czf "$TEMP_ARCHIVE" \
   --exclude='.idea' \
   --exclude='.mcp.json' \
   --exclude='dist' \
-  --exclude='claudebox.run' \
+  --exclude='claudecircle.run' \
   --exclude='*.swp' \
   --exclude='*~' \
   --exclude='archive.tar.gz' \
@@ -71,4 +71,4 @@ echo "   📄 Archive: $ARCHIVE ($(ls -lh "$ARCHIVE" | awk '{print $5}'))"
 echo "   🔐 SHA256: $SHA256"
 
 # Create a symlink from the root for backward compatibility
-ln -sf "$OUTPUT" claudebox.run
+ln -sf "$OUTPUT" claudecircle.run

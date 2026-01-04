@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Command Module Loader and Reference
 # ============================================================================
-# This is the central command management system for ClaudeBox.
+# This is the central command management system for ClaudeCircle.
 # All command implementations are organized into logical modules below.
 
 # ============================================================================
-# CORE COMMANDS - Essential ClaudeBox operations
+# CORE COMMANDS - Essential ClaudeCircle operations
 # ============================================================================
 # Commands: help, shell, update
-# - help: Shows ClaudeBox help and Claude CLI help
+# - help: Shows ClaudeCircle help and Claude CLI help
 # - shell: Opens an interactive shell in the container
-# - update: Updates Claude CLI and optionally ClaudeBox itself
+# - update: Updates Claude CLI and optionally ClaudeCircle itself
 source "${LIB_DIR}/commands.core.sh"
 
 # ============================================================================
@@ -39,7 +39,7 @@ source "${LIB_DIR}/commands.slot.sh"
 # ============================================================================
 # Commands: info, projects, allowlist
 # - info: Shows comprehensive project and system information
-# - projects: Lists all ClaudeBox projects system-wide
+# - projects: Lists all ClaudeCircle projects system-wide
 # - allowlist: Shows/manages the firewall allowlist
 source "${LIB_DIR}/commands.info.sh"
 
@@ -48,8 +48,8 @@ source "${LIB_DIR}/commands.info.sh"
 # ============================================================================
 # Commands: clean, undo, redo
 # - clean: Various cleanup operations (containers, images, cache, etc.)
-# - undo: Restores the oldest backup of claudebox script
-# - redo: Restores the newest backup of claudebox script
+# - undo: Restores the oldest backup of claudecircle script
+# - redo: Restores the newest backup of claudecircle script
 source "${LIB_DIR}/commands.clean.sh"
 
 # ============================================================================
@@ -57,9 +57,9 @@ source "${LIB_DIR}/commands.clean.sh"
 # ============================================================================
 # Commands: save, unlink, rebuild, tmux, project
 # - save: Saves default command-line flags
-# - unlink: Removes the claudebox symlink
+# - unlink: Removes the claudecircle symlink
 # - rebuild: Forces a Docker image rebuild
-# - tmux: Launches ClaudeBox with tmux support
+# - tmux: Launches ClaudeCircle with tmux support
 # - project: Opens a project by name from anywhere
 source "${LIB_DIR}/commands.system.sh"
 
@@ -75,8 +75,8 @@ show_no_slots_menu() {
     echo
     printf "To continue, you'll need an available container slot.\n"
     echo
-    printf "  ${CYAN}claudebox create${NC}  - Create a new slot\n"
-    printf "  ${CYAN}claudebox slots${NC}   - View existing slots\n"
+    printf "  ${CYAN}claudecircle create${NC}  - Create a new slot\n"
+    printf "  ${CYAN}claudecircle slots${NC}   - View existing slots\n"
     echo
     printf "  ${DIM}Hint: Create multiple slots to run parallel authenticated${NC}\n"
     printf "  ${DIM}Claude sessions in the same project.${NC}\n"
@@ -92,10 +92,10 @@ show_no_ready_slots_menu() {
     printf '\n'
     printf '%s\n' "You must have at least one slot that is authenticated and inactive."
     printf '\n'
-    printf '%s\n' "Run 'claudebox slots' to check your slots"
-    printf '%s\n' "Run 'claudebox create' to create a new slot"
+    printf '%s\n' "Run 'claudecircle slots' to check your slots"
+    printf '%s\n' "Run 'claudecircle create' to create a new slot"
     printf '\n'
-    printf '%s\n' "To use a specific slot: claudebox slot <number>"
+    printf '%s\n' "To use a specific slot: claudecircle slot <number>"
     printf '\n'
 }
 
@@ -105,7 +105,7 @@ show_help() {
     local message="${1:-}"
     local footer="${2:-}"
     
-    # ClaudeBox specific commands
+    # ClaudeCircle specific commands
     local our_commands="  profiles                        List all available profiles
   projects                        List all projects with paths
   add <profiles...>               Add development profiles
@@ -122,18 +122,18 @@ show_help() {
   slots                           List all container slots
   slot <number>                   Launch a specific container slot
   project <name>                  Open project by name/hash from anywhere
-  tmux                            Launch ClaudeBox with tmux support enabled"
+  tmux                            Launch ClaudeCircle with tmux support enabled"
     
     # Check if we're in a project directory
     local project_folder_name
     project_folder_name=$(get_project_folder_name "$PROJECT_DIR" 2>/dev/null || echo "NONE")
     
     if [[ "$project_folder_name" != "NONE" ]] && [[ -n "${IMAGE_NAME:-}" ]] && docker image inspect "$IMAGE_NAME" &>/dev/null; then
-        # In project directory with Docker image - show brief ClaudeBox help and note about Claude commands
+        # In project directory with Docker image - show brief ClaudeCircle help and note about Claude commands
         echo
         logo_small
         echo
-        echo "Usage: claudebox [OPTIONS] [COMMAND]"
+        echo "Usage: claudecircle [OPTIONS] [COMMAND]"
         echo
         echo "Docker Environment for Claude CLI"
         echo
@@ -143,21 +143,21 @@ show_help() {
         echo "  --enable-sudo                    Enable sudo without password"
         echo "  --disable-firewall               Disable network restrictions"
         echo
-        echo "ClaudeBox Commands:"
+        echo "ClaudeCircle Commands:"
         echo "$our_commands"
         echo
         cecho "For Claude CLI commands, run:" "$CYAN"
-        cecho "  claudebox help claude" "$CYAN"
+        cecho "  claudecircle help claude" "$CYAN"
         echo
         cecho "For full command reference, run:" "$CYAN"
-        cecho "  claudebox help full" "$CYAN"
+        cecho "  claudecircle help full" "$CYAN"
         echo
     else
         # No Docker image - show compact menu
         echo
         logo_small
         echo
-        echo "Usage: claudebox [OPTIONS] [COMMAND]"
+        echo "Usage: claudecircle [OPTIONS] [COMMAND]"
         echo
         if [[ -n "$message" ]]; then
             echo "$message"
@@ -184,11 +184,11 @@ show_help() {
 # Show Claude help (runs Claude's help in container)
 show_claude_help() {
     if [[ -n "${IMAGE_NAME:-}" ]] && docker image inspect "$IMAGE_NAME" &>/dev/null; then
-        # Get Claude's help and just change claude to claudebox in the header
+        # Get Claude's help and just change claude to claudecircle in the header
         local claude_help=$(docker run --rm "$IMAGE_NAME" claude --help 2>&1 | grep -v "iptables")
         
-        # Just change claude to claudebox in the first line
-        local processed_help=$(echo "$claude_help" | sed '1s/claude/claudebox/g')
+        # Just change claude to claudecircle in the first line
+        local processed_help=$(echo "$claude_help" | sed '1s/claude/claudecircle/g')
         
         # Output everything at once
         echo
@@ -196,7 +196,7 @@ show_claude_help() {
         echo
         echo "$processed_help"
     else
-        error "No Docker image found for this project. Run 'claudebox' first to build the image."
+        error "No Docker image found for this project. Run 'claudecircle' first to build the image."
     fi
 }
 
@@ -208,7 +208,7 @@ show_full_help() {
         
         # Process and combine everything in memory
         local full_help=$(echo "$claude_help" | \
-            sed '1s/claude/claudebox/g' | \
+            sed '1s/claude/claudecircle/g' | \
             sed '/^Commands:/i\
   --verbose                        Show detailed output\
   --enable-sudo                    Enable sudo without password\
@@ -231,7 +231,7 @@ show_full_help() {
   slots                           List all container slots\
   slot <number>                   Launch a specific container slot\
   project <name>                  Open project by name/hash from anywhere\
-  tmux                            Launch ClaudeBox with tmux support enabled')
+  tmux                            Launch ClaudeCircle with tmux support enabled')
         
         # Output everything at once
         echo
@@ -246,7 +246,7 @@ show_full_help() {
 
 # Forward unknown commands to container
 _forward_to_container() {
-    run_claudebox_container "" "interactive" "$@"
+    run_claudecircle_container "" "interactive" "$@"
 }
 
 # ============================================================================

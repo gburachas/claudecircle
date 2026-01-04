@@ -1,8 +1,8 @@
-# ClaudeBox Checksum and Naming System
+# ClaudeCircle Checksum and Naming System
 
 ## Overview
 
-ClaudeBox uses a dual-checksum system with 8-character hexadecimal CRC32 hashes for:
+ClaudeCircle uses a dual-checksum system with 8-character hexadecimal CRC32 hashes for:
 1. **Path-based identification** - Avoiding folder name collisions
 2. **Content-based validation** - Detecting when rebuilds are needed
 
@@ -18,14 +18,14 @@ All checksums are:
 - **Input**: Full project directory path (before normalization)
 - **Example**: `/home/Rich/MyProject` → `cc618e36`
 - **Used in**:
-  - Folder name: `~/.claudebox/projects/home_rich_myproject_cc618e36/`
-  - Docker image: `claudebox-cc618e36`
+  - Folder name: `~/.claudecircle/projects/home_rich_myproject_cc618e36/`
+  - Docker image: `claudecircle-cc618e36`
 
 ### 2. Profiles Content Checksum  
 - **Purpose**: Detect when profiles have changed
 - **Input**: Contents of `profiles.ini` file
 - **Example**: File contents → `ab12cd34`
-- **Stored in**: Docker image label `claudebox_profiles_crc`
+- **Stored in**: Docker image label `claudecircle_profiles_crc`
 - **Used for**: Triggering rebuilds when profiles change
 
 ### 3. Slot Checksum
@@ -42,7 +42,7 @@ All checksums are:
 ## Directory Structure
 
 ```
-~/.claudebox/
+~/.claudecircle/
 ├── projects/
 │   ├── home_rich_myproject_cc618e36/      # Path checksum in folder name
 │   │   ├── profiles.ini                   # Content gets checksummed
@@ -55,40 +55,40 @@ All checksums are:
 
 ## Docker Naming Convention
 
-All Docker images use the prefix `claudebox-` followed by the appropriate checksum:
+All Docker images use the prefix `claudecircle-` followed by the appropriate checksum:
 
 ### Legacy Architecture (Being Replaced)
 ```
-claudebox-cc618e36    # Project image (monolithic)
-claudebox-ab123def    # Another project (monolithic)
+claudecircle-cc618e36    # Project image (monolithic)
+claudecircle-ab123def    # Another project (monolithic)
 ```
 
 ### Core Image Architecture (Approved)
 ```
-~/.claudebox/
+~/.claudecircle/
 ├── core/
 │   ├── checksum              # MD5 of core Dockerfile
-│   └── image: claudebox-core-{checksum}
+│   └── image: claudecircle-core-{checksum}
 ├── projects/
 │   ├── home_rich_myproject_cc618e36/
-│   │   ├── image: claudebox-cc618e36  # FROM claudebox-core-{checksum}
+│   │   ├── image: claudecircle-cc618e36  # FROM claudecircle-core-{checksum}
 │   │   ├── profiles.ini
 │   │   └── 524b9a6e/        # Slot 1
 │   │       └── .claude/
 │   └── home_user_other_ab123def/
-│       └── image: claudebox-ab123def  # FROM claudebox-core-{checksum}
+│       └── image: claudecircle-ab123def  # FROM claudecircle-core-{checksum}
 ```
 
 **Benefits of Core Image Architecture**:
 - Shared base layer reduces disk usage
 - Faster project image builds (only profile layers rebuild)
-- Consistent claudebox- prefix across all images
+- Consistent claudecircle- prefix across all images
 - Core updates benefit all projects automatically
 
 **Image Naming**:
-- Core: `claudebox-core-{core_dockerfile_md5}`
-- Projects: `claudebox-{project_path_crc32}` (unchanged)
-- All project images would use: `FROM claudebox-core-{checksum}`
+- Core: `claudecircle-core-{core_dockerfile_md5}`
+- Projects: `claudecircle-{project_path_crc32}` (unchanged)
+- All project images would use: `FROM claudecircle-core-{checksum}`
 
 ## Checksum Calculation
 
@@ -102,14 +102,14 @@ checksum=$(perl -e 'use String::CRC32; printf "%08x\n", crc32($ARGV[0])' "$strin
 checksum=$(printf "%08x" $(cksum <<< "$string" | cut -d' ' -f1))
 ```
 
-### In ClaudeBox:
+### In ClaudeCircle:
 The `get_crc32()` function in `common.sh` handles platform differences automatically.
 
 ## Change Detection Flow
 
 1. **Build Time**:
    - Calculate CRC32 of `profiles.ini`
-   - Store as Docker label: `--label claudebox_profiles_crc=ab12cd34`
+   - Store as Docker label: `--label claudecircle_profiles_crc=ab12cd34`
 
 2. **Runtime Check**:
    ```bash
@@ -117,7 +117,7 @@ The `get_crc32()` function in `common.sh` handles platform differences automatic
    current_crc=$(get_crc32 < profiles.ini)
    
    # Get image's stored checksum
-   image_crc=$(docker image inspect --format '{{.Config.Labels.claudebox_profiles_crc}}' "$IMAGE_NAME")
+   image_crc=$(docker image inspect --format '{{.Config.Labels.claudecircle_profiles_crc}}' "$IMAGE_NAME")
    
    # Compare
    if [[ "$current_crc" != "$image_crc" ]]; then
@@ -150,9 +150,9 @@ The `get_crc32()` function in `common.sh` handles platform differences automatic
    - Collision probability is acceptably low for local development
 
 3. **Slots Share Images**: All slots under a parent use the same Docker image:
-   - Parent: `claudebox-cc618e36`
-   - Slot 1: Uses `claudebox-cc618e36`
-   - Slot 2: Uses `claudebox-cc618e36`
+   - Parent: `claudecircle-cc618e36`
+   - Slot 1: Uses `claudecircle-cc618e36`
+   - Slot 2: Uses `claudecircle-cc618e36`
    - Only slot data folders differ
 
 This system ensures consistent, portable, and collision-resistant naming across all platforms while maintaining Docker compatibility.

@@ -7,30 +7,30 @@
 _cmd_clean() {
     case "${1:-}" in
         docker)
-            # Check if any ClaudeBox resources exist
-            local containers=$(docker ps -a --filter "label=claudebox.project" -q 2>/dev/null)
-            local cb_containers=$(docker ps -a --format "{{.Names}}" 2>/dev/null | grep "^claudebox-" || true)
-            local images=$(docker images --filter "reference=claudebox*" -q 2>/dev/null)
-            local volumes=$(docker volume ls -q --filter "name=claudebox" 2>/dev/null)
+            # Check if any ClaudeCircle resources exist
+            local containers=$(docker ps -a --filter "label=claudecircle.project" -q 2>/dev/null)
+            local cb_containers=$(docker ps -a --format "{{.Names}}" 2>/dev/null | grep "^claudecircle-" || true)
+            local images=$(docker images --filter "reference=claudecircle*" -q 2>/dev/null)
+            local volumes=$(docker volume ls -q --filter "name=claudecircle" 2>/dev/null)
             
             if [[ -z "$containers" ]] && [[ -z "$cb_containers" ]] && [[ -z "$images" ]] && [[ -z "$volumes" ]]; then
-                info "No ClaudeBox Docker resources found"
+                info "No ClaudeCircle Docker resources found"
                 echo
                 exit 0
             fi
             
-            # Remove all claudebox containers
+            # Remove all claudecircle containers
             if [[ -n "$containers" ]]; then
-                docker ps -a --filter "label=claudebox.project" -q | xargs -r docker rm -f 2>/dev/null || true
+                docker ps -a --filter "label=claudecircle.project" -q | xargs -r docker rm -f 2>/dev/null || true
             fi
             if [[ -n "$cb_containers" ]]; then
-                docker ps -a --format "{{.Names}}" | grep "^claudebox-" | xargs -r docker rm -f 2>/dev/null || true
+                docker ps -a --format "{{.Names}}" | grep "^claudecircle-" | xargs -r docker rm -f 2>/dev/null || true
             fi
 
-            # Remove ALL claudebox images (including base)
+            # Remove ALL claudecircle images (including base)
             if [[ -n "$images" ]]; then
-                docker images --filter "reference=claudebox-*" -q | xargs -r docker rmi -f 2>/dev/null || true
-                docker images --filter "reference=claudebox" -q | xargs -r docker rmi -f 2>/dev/null || true
+                docker images --filter "reference=claudecircle-*" -q | xargs -r docker rmi -f 2>/dev/null || true
+                docker images --filter "reference=claudecircle" -q | xargs -r docker rmi -f 2>/dev/null || true
             fi
 
             # Remove dangling images
@@ -41,10 +41,10 @@ _cmd_clean() {
 
             # Remove volumes
             if [[ -n "$volumes" ]]; then
-                docker volume ls -q --filter "name=claudebox" | xargs -r docker volume rm 2>/dev/null || true
+                docker volume ls -q --filter "name=claudecircle" | xargs -r docker volume rm 2>/dev/null || true
             fi
 
-            success "ClaudeBox Docker resources removed"
+            success "ClaudeCircle Docker resources removed"
             echo
             exit 0
             ;;
@@ -59,7 +59,7 @@ _cmd_clean() {
                 local matches=()
                 
                 # Search through all project directories
-                for parent_dir in "$HOME/.claudebox/projects"/*/ ; do
+                for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
                     [[ -d "$parent_dir" ]] || continue
                     
                     local dir_name=$(basename "$parent_dir")
@@ -119,11 +119,11 @@ _cmd_clean() {
             ;;
         projects)
             # Clean all projects
-            info "Cleaning all ClaudeBox projects..."
+            info "Cleaning all ClaudeCircle projects..."
             echo
             
             local count=0
-            for parent_dir in "$HOME/.claudebox/projects"/*/ ; do
+            for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
                 [[ -d "$parent_dir" ]] || continue
                 
                 local project_name=$(basename "$parent_dir")
@@ -149,17 +149,17 @@ _cmd_clean() {
         *)
             logo_small
             echo
-            cecho "ClaudeBox Clean Options:" "$CYAN"
+            cecho "ClaudeCircle Clean Options:" "$CYAN"
             echo
             echo -e "  ${GREEN}clean docker${NC}             Remove all Docker resources"
             echo -e "  ${GREEN}clean project [name]${NC}     Clean current or named project"
             echo -e "  ${GREEN}clean projects${NC}           Clean all projects"
             echo
             cecho "Examples:" "$YELLOW"
-            echo "  claudebox clean docker      # Remove all Docker resources"
-            echo "  claudebox clean project     # Clean current project"
-            echo "  claudebox clean project abc # Clean project 'abc'"
-            echo "  claudebox clean projects    # Clean all projects"
+            echo "  claudecircle clean docker      # Remove all Docker resources"
+            echo "  claudecircle clean project     # Clean current project"
+            echo "  claudecircle clean project abc # Clean project 'abc'"
+            echo "  claudecircle clean projects    # Clean all projects"
             echo
             exit 0
             ;;
@@ -173,7 +173,7 @@ _clean_project() {
     
     info "Cleaning project: $project_name ($project_path)"
     
-    local parent_dir="$HOME/.claudebox/projects/$project_name"
+    local parent_dir="$HOME/.claudecircle/projects/$project_name"
     
     # Remove all slot directories
     local slots_removed=0
@@ -189,13 +189,13 @@ _clean_project() {
     done
     
     # Remove containers for this project
-    local containers=$(docker ps -a --format "{{.Names}}" 2>/dev/null | grep "^claudebox-${project_name}-" || true)
+    local containers=$(docker ps -a --format "{{.Names}}" 2>/dev/null | grep "^claudecircle-${project_name}-" || true)
     if [[ -n "$containers" ]]; then
         echo "$containers" | xargs -r docker rm -f 2>/dev/null || true
     fi
     
     # Remove project image (but not core)
-    local image_name="claudebox-${project_name}"
+    local image_name="claudecircle-${project_name}"
     if docker image inspect "$image_name" >/dev/null 2>&1; then
         docker rmi -f "$image_name" 2>/dev/null || true
     fi
@@ -210,14 +210,14 @@ _clean_project() {
 }
 
 _cmd_undo() {
-    local backups_dir="$HOME/.claudebox/backups"
+    local backups_dir="$HOME/.claudecircle/backups"
     if [[ ! -d "$backups_dir" ]] || [[ -z "$(ls -A "$backups_dir" 2>/dev/null)" ]]; then
         error "No backups found"
     fi
     
     # Get oldest backup (smallest timestamp)
     local oldest=$(ls -1 "$backups_dir" | sort -n | head -1)
-    local installed_path=$(which claudebox 2>/dev/null || echo "/usr/local/bin/claudebox")
+    local installed_path=$(which claudecircle 2>/dev/null || echo "/usr/local/bin/claudecircle")
     
     info "Restoring oldest backup from $(date -d @$oldest '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -r $oldest '+%Y-%m-%d %H:%M:%S')"
     
@@ -229,19 +229,19 @@ _cmd_undo() {
         sudo chmod +x "$installed_path"
     fi
     
-    success "✓ Restored claudebox from backup"
+    success "✓ Restored claudecircle from backup"
     exit 0
 }
 
 _cmd_redo() {
-    local backups_dir="$HOME/.claudebox/backups"
+    local backups_dir="$HOME/.claudecircle/backups"
     if [[ ! -d "$backups_dir" ]] || [[ -z "$(ls -A "$backups_dir" 2>/dev/null)" ]]; then
         error "No backups found"
     fi
     
     # Get newest backup (largest timestamp)
     local newest=$(ls -1 "$backups_dir" | sort -n | tail -1)
-    local installed_path=$(which claudebox 2>/dev/null || echo "/usr/local/bin/claudebox")
+    local installed_path=$(which claudecircle 2>/dev/null || echo "/usr/local/bin/claudecircle")
     
     info "Restoring newest backup from $(date -d @$newest '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -r $newest '+%Y-%m-%d %H:%M:%S')"
     
@@ -253,7 +253,7 @@ _cmd_redo() {
         sudo chmod +x "$installed_path"
     fi
     
-    success "✓ Restored claudebox from backup"
+    success "✓ Restored claudecircle from backup"
     exit 0
 }
 

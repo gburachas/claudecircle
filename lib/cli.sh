@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Unified CLI parser for ClaudeBox
+# Unified CLI parser for ClaudeCircle
 # Implements the four-bucket architecture for clean, predictable CLI handling
 
 # ============================================================================
@@ -16,7 +16,7 @@ readonly SCRIPT_COMMANDS=(shell create slot slots revoke profiles projects profi
 # Sets global variables:
 #   host_flags: Array of host-only flags (help, version, etc)
 #   control_flags: Array of control flags (verbose, enable-sudo, etc)
-#   script_command: Single command for ClaudeBox to execute
+#   script_command: Single command for ClaudeCircle to execute
 #   pass_through: Array of args to pass to Claude in container
 # Note: Each argument goes into exactly ONE bucket - no duplication
 parse_cli_args() {
@@ -66,7 +66,7 @@ process_host_flags() {
                 export REBUILD=true
                 ;;
             tmux)
-                export CLAUDEBOX_WRAP_TMUX=true
+                export CLAUDECIRCLE_WRAP_TMUX=true
                 ;;
         esac
     done

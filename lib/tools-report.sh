@@ -2,10 +2,10 @@
 # Tools Report Generator - Creates tooling.md documenting installed tools
 # ============================================================================
 
-# Generate the developer tools report and save to ~/.claudebox/tooling.md
+# Generate the developer tools report and save to ~/.claudecircle/tooling.md
 generate_tools_report() {
-    local profiles_ini="/home/claude/.claudebox/profiles.ini"
-    local output_file="/home/claude/.claudebox/tooling.md"
+    local profiles_ini="/home/claude/.claudecircle/profiles.ini"
+    local output_file="/home/claude/.claudecircle/tooling.md"
     
     # Start the markdown document
     {
@@ -74,14 +74,14 @@ generate_tools_report() {
         else
             echo "## Default Environment"
             echo
-            echo "No profiles.ini found - using default ClaudeBox environment."
+            echo "No profiles.ini found - using default ClaudeCircle environment."
             echo
         fi
         
         # Always installed tools
         echo "## Core Tools (Always Available)"
         echo
-        echo "These tools are included in every ClaudeBox container:"
+        echo "These tools are included in every ClaudeCircle container:"
         echo
         echo "### Development Essentials"
         echo "- **git** - Version control system"
@@ -230,8 +230,8 @@ _describe_profile() {
         flutter)
             echo "**Flutter Framework**"
             echo
-            echo Use FLUTTER_SDK_VERSION environment variable before running claudebox to set use different flutter version
-            echo Ex: FLUTTER_SDK_VERSION=beta claudebox
+            echo Use FLUTTER_SDK_VERSION environment variable before running claudecircle to set use different flutter version
+            echo Ex: FLUTTER_SDK_VERSION=beta claudecircle
             echo
             echo "Available commands:"
             echo "- flutter - To manage flutter apps"

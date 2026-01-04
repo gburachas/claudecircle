@@ -1,8 +1,8 @@
-# ClaudeBox Slot Management System
+# ClaudeCircle Slot Management System
 
 ## Overview
 
-ClaudeBox uses an elegant slot-based system to manage multiple authenticated Claude instances per project. Each slot represents an isolated environment with its own credentials, cache, and configuration, while sharing the same Docker image.
+ClaudeCircle uses an elegant slot-based system to manage multiple authenticated Claude instances per project. Each slot represents an isolated environment with its own credentials, cache, and configuration, while sharing the same Docker image.
 
 **CRITICAL**: This document describes a working system with specific design decisions. DO NOT modify the core algorithms without understanding all interdependencies.
 
@@ -35,7 +35,7 @@ Each project maintains a counter file (`.project_container_counter`) that tracks
 ### 3. Directory Structure
 
 ```
-~/.claudebox/projects/
+~/.claudecircle/projects/
 └── home_rich_myproject_cc618e36/        # Parent directory
     ├── .project_container_counter        # Current max slot (e.g., "3")
     ├── profiles.ini                      # Shared profiles
@@ -75,13 +75,13 @@ When launching a container:
 
 Running container detection:
 ```bash
-docker ps --format "{{.Names}}" | grep "^claudebox-.*-${slot_name}$"
+docker ps --format "{{.Names}}" | grep "^claudecircle-.*-${slot_name}$"
 ```
 
 ### 3. Slot Deletion (Manual)
 
 Users can manually delete slot directories:
-- Remove the slot directory (e.g., `rm -rf ~/.claudebox/projects/*/524b9a6e`)
+- Remove the slot directory (e.g., `rm -rf ~/.claudecircle/projects/*/524b9a6e`)
 - Slot becomes "dead" and available for reuse
 - Counter remains unchanged (for now)
 
@@ -109,7 +109,7 @@ After:  Counter=3
 ### Shared Docker Images
 
 All slots under a project share the **same Docker image**:
-- Image name: `claudebox-{parent_folder_name}`
+- Image name: `claudecircle-{parent_folder_name}`
 - Only slot data directories differ
 - Efficient disk usage and fast slot creation
 
@@ -117,14 +117,14 @@ All slots under a project share the **same Docker image**:
 
 Container names include both project and slot identifiers:
 ```
-claudebox-{parent_name}-{slot_checksum}
+claudecircle-{parent_name}-{slot_checksum}
 ```
 
-Example: `claudebox-home_rich_myproject_cc618e36-524b9a6e`
+Example: `claudecircle-home_rich_myproject_cc618e36-524b9a6e`
 
 ## State Indicators
 
-When listing slots (`claudebox slots`):
+When listing slots (`claudecircle slots`):
 - ✔️ = Authenticated (has .credentials.json)
 - 🔒 = Not authenticated
 - 💀 = Removed/dead slot
@@ -135,11 +135,11 @@ When listing slots (`claudebox slots`):
 
 ### Example 1: Fresh Project
 ```
-$ claudebox create
+$ claudecircle create
 Creating slot 1 (524b9a6e)
 Counter: 0 → 1
 
-$ claudebox create  
+$ claudecircle create  
 Creating slot 2 (ab89def0)
 Counter: 1 → 2
 ```
@@ -147,9 +147,9 @@ Counter: 1 → 2
 ### Example 2: Slot Reuse
 ```
 Initial state: Slots 1,2,3 exist (counter=3)
-$ rm -rf ~/.claudebox/projects/*/ab89def0  # Delete slot 2
+$ rm -rf ~/.claudecircle/projects/*/ab89def0  # Delete slot 2
 
-$ claudebox create
+$ claudecircle create
 Reusing dead slot 2 (ab89def0)
 Counter: remains 3
 ```
@@ -159,7 +159,7 @@ Counter: remains 3
 Initial: Slots 1,2,3,4,5 exist (counter=5)
 Delete slots 4,5 manually
 
-$ claudebox slots  # Triggers prune
+$ claudecircle slots  # Triggers prune
 Counter: 5 → 3
 ```
 
@@ -228,10 +228,10 @@ generate_container_name() {
 ### "No slots available"
 - Check if all slots have running containers
 - Use `docker ps` to verify container states
-- Create new slot with `claudebox create`
+- Create new slot with `claudecircle create`
 
 ### Counter seems wrong
-- Run `claudebox slots` to trigger auto-prune
+- Run `claudecircle slots` to trigger auto-prune
 - Check `.project_container_counter` file
 - Verify slot directories match counter
 
@@ -242,7 +242,7 @@ generate_container_name() {
 
 ## Summary
 
-The ClaudeBox slot system elegantly handles:
+The ClaudeCircle slot system elegantly handles:
 - Multiple authenticated Claude instances per project
 - Efficient slot reuse through dead slot detection  
 - Dynamic sizing with pruning

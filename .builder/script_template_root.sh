@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Single-file "claudebox" installer & updater (silent on success)
+# Single-file "claudecircle" installer & updater (silent on success)
 # macOS (bash 3.2+) & Linux compatible
 # Release SHA256: __ARCHIVE_SHA256__
 #
@@ -9,7 +9,7 @@
 set -e
 
 # 1) Release mode install/update
-INSTALL_DIR="$HOME/.claudebox"
+INSTALL_DIR="$HOME/.claudecircle"
 SOURCE_DIR="$INSTALL_DIR/source"
 ARCHIVE_SHA256="__ARCHIVE_SHA256__"
 ARCHIVE_PATH="$INSTALL_DIR/archive.tar.gz"
@@ -37,6 +37,6 @@ else
 fi
 
 # 5) Launch main.sh from source directory
-CLAUDEBOX_INSTALLER_RUN="true" exec bash "$SOURCE_DIR/main.sh" "$@"
+CLAUDECIRCLE_INSTALLER_RUN="true" exec bash "$SOURCE_DIR/main.sh" "$@"
 
 __ARCHIVE_BELOW__

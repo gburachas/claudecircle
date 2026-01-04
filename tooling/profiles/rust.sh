@@ -9,8 +9,8 @@ if [ "${1:-}" = "info" ]; then
 fi
 
 # Set Rust installation directories
-export RUSTUP_HOME="$HOME/.claudebox/.rustup"
-export CARGO_HOME="$HOME/.claudebox/.cargo"
+export RUSTUP_HOME="$HOME/.claudecircle/.rustup"
+export CARGO_HOME="$HOME/.claudecircle/.cargo"
 export PATH="$CARGO_HOME/bin:$PATH"
 
 # Install rustup if not already installed
@@ -58,4 +58,4 @@ for tool in "${CARGO_TOOLS[@]}"; do
     fi
 done
 
-echo "Rust development environment installed in ~/.claudebox"
+echo "Rust development environment installed in ~/.claudecircle"

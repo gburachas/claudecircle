@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ClaudeBox will be documented in this file.
+All notable changes to ClaudeCircle will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Build System Overhaul**: New versioned release system
   - Version tracking with `CLAUDEBOX_VERSION` constant
   - Builds output to `dist/` directory
-  - Creates versioned archives (e.g., `claudebox-2.0.0.tar.gz`)
-  - Self-extracting installer (`claudebox.run`)
+  - Creates versioned archives (e.g., `claudecircle-2.0.0.tar.gz`)
+  - Self-extracting installer (`claudecircle.run`)
 - **PATH Setup**: Automatic PATH configuration detection
   - Shows setup instructions when `~/.local/bin` not in PATH
   - Works with both bash and zsh
@@ -78,7 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2025-06-20]
 
 ### Fixed
-- Resolved initialization errors in the claudebox script
+- Resolved initialization errors in the claudecircle script
 - Improved container performance and stability
 
 ### Removed

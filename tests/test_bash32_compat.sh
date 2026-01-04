@@ -3,7 +3,7 @@
 # Run this with: bash test_bash32_compat.sh
 
 echo "======================================"
-echo "ClaudeBox Bash 3.2 Compatibility Test"
+echo "ClaudeCircle Bash 3.2 Compatibility Test"
 echo "======================================"
 echo "Current Bash version: $BASH_VERSION"
 echo

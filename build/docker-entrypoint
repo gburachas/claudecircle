@@ -48,12 +48,12 @@ if [ "$ENABLE_SUDO" != "true" ]; then
 fi
 
 # Python venv management with flag-based system
-if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
-    CLAUDEBOX_DIR="/home/DOCKERUSER/.claudebox"
-    CONFIG_FILE="$CLAUDEBOX_DIR/profiles.ini"
-    VENV_DIR="$CLAUDEBOX_DIR/.venv"
-    VENV_FLAG="$CLAUDEBOX_DIR/.venv_flag"
-    PYDEV_FLAG="$CLAUDEBOX_DIR/.pydev_flag"
+if [ -n "${CLAUDECIRCLE_PROJECT_NAME:-}" ]; then
+    CLAUDECIRCLE_DIR="/home/DOCKERUSER/.claudecircle"
+    CONFIG_FILE="$CLAUDECIRCLE_DIR/profiles.ini"
+    VENV_DIR="$CLAUDECIRCLE_DIR/.venv"
+    VENV_FLAG="$CLAUDECIRCLE_DIR/.venv_flag"
+    PYDEV_FLAG="$CLAUDECIRCLE_DIR/.pydev_flag"
 
     # Check if we need to set up the core Python environment
     if command -v uv >/dev/null 2>&1; then
@@ -178,10 +178,10 @@ if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
 fi
 
 # Generate tooling.md if profiles have changed
-if [ -n "${CLAUDEBOX_PROJECT_NAME:-}" ]; then
-    PROFILES_INI="/home/DOCKERUSER/.claudebox/profiles.ini"
-    TOOLING_FILE="/home/DOCKERUSER/.claudebox/tooling.md"
-    CHECKSUM_FILE="/home/DOCKERUSER/.claudebox/.tooling_checksum"
+if [ -n "${CLAUDECIRCLE_PROJECT_NAME:-}" ]; then
+    PROFILES_INI="/home/DOCKERUSER/.claudecircle/profiles.ini"
+    TOOLING_FILE="/home/DOCKERUSER/.claudecircle/tooling.md"
+    CHECKSUM_FILE="/home/DOCKERUSER/.claudecircle/.tooling_checksum"
     
     if [ -f "$PROFILES_INI" ]; then
         # Calculate current checksum of profiles.ini
@@ -222,16 +222,16 @@ cd /home/DOCKERUSER
 
 if [[ "${SHELL_MODE:-false}" == "true" ]]; then
     # Use runuser to avoid PTY signal handling issues
-    if [[ "${CLAUDEBOX_WRAP_TMUX:-false}" == "true" ]]; then
+    if [[ "${CLAUDECIRCLE_WRAP_TMUX:-false}" == "true" ]]; then
         # For tmux, create an init script that shows logo then starts shell
         cat > /tmp/tmux-init.sh << 'EOF'
 #!/bin/bash
 export PATH="/home/DOCKERUSER/.local/bin:$PATH"
-if [ -d /home/DOCKERUSER/.claudebox/.venv ]; then
-    export PATH="/home/DOCKERUSER/.claudebox/.venv/bin:$PATH"
-    export VIRTUAL_ENV="/home/DOCKERUSER/.claudebox/.venv"
+if [ -d /home/DOCKERUSER/.claudecircle/.venv ]; then
+    export PATH="/home/DOCKERUSER/.claudecircle/.venv/bin:$PATH"
+    export VIRTUAL_ENV="/home/DOCKERUSER/.claudecircle/.venv"
 fi
-source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null
+source /home/DOCKERUSER/.claudecircle/common.sh 2>/dev/null
 logo_header 2>/dev/null
 exec /bin/zsh
 EOF
@@ -243,10 +243,10 @@ EOF
         # For non-tmux, show logo before starting shell
         if [[ $# -gt 0 ]]; then
             # Execute provided command
-            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudebox/.venv ] && export PATH=\"/home/DOCKERUSER/.claudebox/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudebox/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null; exec \"\$@\"" -- "$@"
+            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudecircle/.venv ] && export PATH=\"/home/DOCKERUSER/.claudecircle/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudecircle/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudecircle/common.sh 2>/dev/null; exec \"\$@\"" -- "$@"
         else
             # Interactive shell
-            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudebox/.venv ] && export PATH=\"/home/DOCKERUSER/.claudebox/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudebox/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudebox/common.sh 2>/dev/null && logo_header 2>/dev/null; exec /bin/zsh"
+            exec runuser -u DOCKERUSER -- bash -c "source /home/DOCKERUSER/.nvm/nvm.sh && export PATH=\"/home/DOCKERUSER/.local/bin:\$PATH\" && [ -d /home/DOCKERUSER/.claudecircle/.venv ] && export PATH=\"/home/DOCKERUSER/.claudecircle/.venv/bin:\$PATH\" && export VIRTUAL_ENV=\"/home/DOCKERUSER/.claudecircle/.venv\"; cd /workspace && source /home/DOCKERUSER/.claudecircle/common.sh 2>/dev/null && logo_header 2>/dev/null; exec /bin/zsh"
         fi
     fi
 else
@@ -306,15 +306,15 @@ else
             export PATH="$HOME/.local/bin:$PATH"
             
             # Activate Python venv if it exists
-            if [ -f "$HOME/.claudebox/.venv/bin/activate" ]; then
-                source "$HOME/.claudebox/.venv/bin/activate"
+            if [ -f "$HOME/.claudecircle/.venv/bin/activate" ]; then
+                source "$HOME/.claudecircle/.venv/bin/activate"
             fi
             
-            # Create symlink from ~/.claude/commands to ~/.claudebox/commands
-            # The ~/.claudebox folder is mounted from the host
-            if [ -d "$HOME/.claudebox/commands" ]; then
+            # Create symlink from ~/.claude/commands to ~/.claudecircle/commands
+            # The ~/.claudecircle folder is mounted from the host
+            if [ -d "$HOME/.claudecircle/commands" ]; then
                 if [ ! -e "$HOME/.claude/commands" ]; then
-                    ln -s "$HOME/.claudebox/commands" "$HOME/.claude/commands"
+                    ln -s "$HOME/.claudecircle/commands" "$HOME/.claude/commands"
                 fi
             fi
             
@@ -365,7 +365,7 @@ else
             fi
             
             # If no arguments and stdin is a terminal, run claude in interactive mode
-            if [[ "${CLAUDEBOX_WRAP_TMUX:-false}" == "true" ]]; then
+            if [[ "${CLAUDECIRCLE_WRAP_TMUX:-false}" == "true" ]]; then
                 if [[ $# -eq 0 ]] && [[ -t 0 ]]; then
                     tmux new-session claude "${mcp_config_args[@]}"
                 else
@@ -382,8 +382,8 @@ else
             fi
             
             # After claude exits, copy .claude.json if it was created
-            if [[ -f "$HOME/.claude.json" ]] && [[ ! -f "$HOME/.claudebox/${CLAUDEBOX_SLOT_NAME}/.claude.json" ]]; then
-                cp "$HOME/.claude.json" "$HOME/.claudebox/${CLAUDEBOX_SLOT_NAME}/.claude.json"
+            if [[ -f "$HOME/.claude.json" ]] && [[ ! -f "$HOME/.claudecircle/${CLAUDECIRCLE_SLOT_NAME}/.claude.json" ]]; then
+                cp "$HOME/.claude.json" "$HOME/.claudecircle/${CLAUDECIRCLE_SLOT_NAME}/.claude.json"
             fi
         ' -- "$@"
     fi

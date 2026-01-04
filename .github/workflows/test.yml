@@ -1,4 +1,4 @@
-name: Test ClaudeBox
+name: Test ClaudeCircle
 
 on:
   push:
@@ -60,16 +60,16 @@ jobs:
         
     - name: Verify installer was created
       run: |
-        test -f claudebox
-        echo "Installer size: $(ls -lh claudebox | awk '{print $5}')"
+        test -f claudecircle
+        echo "Installer size: $(ls -lh claudecircle | awk '{print $5}')"
         
     - name: Test installer in dev mode
       run: |
         # Should detect we're in a git repo and run directly
-        ./claudebox --help | grep "ClaudeBox"
+        ./claudecircle --help | grep "ClaudeCircle"
         
     - name: Upload installer artifact
       uses: actions/upload-artifact@v3
       with:
-        name: claudebox-installer
-        path: claudebox
+        name: claudecircle-installer
+        path: claudecircle

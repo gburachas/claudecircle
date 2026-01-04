@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Folder creation, symlink maintenance and similar idempotent host operations.
 
-# Create or refresh ~/.local/bin/claudebox → actual script location
+# Create or refresh ~/.local/bin/claudecircle → actual script location
 update_symlink() {
     # Ensure the directory exists
     mkdir -p "$(dirname "$LINK_TARGET")"
@@ -35,7 +35,7 @@ update_symlink() {
         if [[ ":$PATH:" != *":$(dirname "$LINK_TARGET"):"* ]]; then
             echo ""
             warn "IMPORTANT: $(dirname "$LINK_TARGET") is not in your PATH"
-            info "To use the 'claudebox' command, add this line to your ~/.zshrc or ~/.bashrc:"
+            info "To use the 'claudecircle' command, add this line to your ~/.zshrc or ~/.bashrc:"
             echo ""
             echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
             echo ""
@@ -241,7 +241,7 @@ needs_docker_rebuild() {
         
         # If templates changed, we need to force no-cache
         if [[ "$templates_changed" == "true" ]]; then
-            export CLAUDEBOX_FORCE_NO_CACHE=true
+            export CLAUDECIRCLE_FORCE_NO_CACHE=true
         fi
         
         return 0

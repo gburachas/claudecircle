@@ -100,7 +100,7 @@ expand_profile() {
 get_profile_file_path() {
     # Use the parent directory name, not the slot name
     local parent_name=$(generate_parent_folder_name "$PROJECT_DIR")
-    local parent_dir="$HOME/.claudebox/projects/$parent_name"
+    local parent_dir="$HOME/.claudecircle/projects/$parent_name"
     mkdir -p "$parent_dir"
     echo "$parent_dir/profiles.ini"
 }
@@ -178,7 +178,7 @@ update_profile_section() {
 }
 
 get_current_profiles() {
-    local profiles_file="${PROJECT_PARENT_DIR:-$HOME/.claudebox/projects/$(generate_parent_folder_name "$PWD")}/profiles.ini"
+    local profiles_file="${PROJECT_PARENT_DIR:-$HOME/.claudecircle/projects/$(generate_parent_folder_name "$PWD")}/profiles.ini"
     local current_profiles=()
     
     if [[ -f "$profiles_file" ]]; then

@@ -28,16 +28,16 @@ jobs:
           export TEST_HOME=$(mktemp -d)
           export HOME="$TEST_HOME"
           echo "Testing installation in $HOME"
-          bash ./claudebox.run.sh
-          ls -la ~/.claudebox/scripts/bin/
-          ~/.local/bin/claudebox --help || echo "OK (help displayed or no version flag)"
+          bash ./claudecircle.run.sh
+          ls -la ~/.claudecircle/scripts/bin/
+          ~/.local/bin/claudecircle --help || echo "OK (help displayed or no version flag)"
 
       - name: Upload installer artifact
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: claudebox-installer
-          path: claudebox.run.sh
+          name: claudecircle-installer
+          path: claudecircle.run.sh
 
   release:
     needs: test-installer
@@ -56,6 +56,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./claudebox.run.sh
-          asset_name: claudebox.run.sh
+          asset_path: ./claudecircle.run.sh
+          asset_name: claudecircle.run.sh
           asset_content_type: application/x-sh

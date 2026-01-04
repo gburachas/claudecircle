@@ -1,5 +1,5 @@
-# Project-specific Dockerfile that builds on top of claudebox-core
-FROM claudebox-core
+# Project-specific Dockerfile that builds on top of claudecircle-core
+FROM claudecircle-core
 
 # Switch to root for installations
 USER root

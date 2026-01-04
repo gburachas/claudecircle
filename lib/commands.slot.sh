@@ -42,7 +42,7 @@ _cmd_slot() {
     
     # Validate slot number
     if [[ ! "$slot_num" =~ ^[0-9]+$ ]]; then
-        error "Usage: claudebox slot <number> [claude arguments...]"
+        error "Usage: claudecircle slot <number> [claude arguments...]"
     fi
     
     # Get the slot directory
@@ -51,7 +51,7 @@ _cmd_slot() {
     
     # Check if slot exists
     if [[ ! -d "$slot_dir" ]]; then
-        error "Slot $slot_num does not exist. Run 'claudebox slots' to see available slots."
+        error "Slot $slot_num does not exist. Run 'claudecircle slots' to see available slots."
     fi
     
     # Set up environment for this specific slot
@@ -59,7 +59,7 @@ _cmd_slot() {
     export PROJECT_SLOT_DIR="$slot_dir"
     export PROJECT_PARENT_DIR="$parent_dir"
     export IMAGE_NAME=$(get_image_name)
-    export CLAUDEBOX_SLOT_NUMBER="$slot_num"
+    export CLAUDECIRCLE_SLOT_NUMBER="$slot_num"
     
     info "Using slot $slot_num: $slot_name"
     
@@ -69,17 +69,17 @@ _cmd_slot() {
     # Now we need to run the container with the slot selected
     # Get parent folder name for container naming
     local parent_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
-    local container_name="claudebox-${parent_folder_name}-${slot_name}"
+    local container_name="claudecircle-${parent_folder_name}-${slot_name}"
     
     # If we're in tmux, get the pane ID and pass it through
     local tmux_pane_id=""
     if [[ -n "${TMUX:-}" ]]; then
         tmux_pane_id=$(tmux display-message -p '#{pane_id}')
-        export CLAUDEBOX_TMUX_PANE="$tmux_pane_id"
+        export CLAUDECIRCLE_TMUX_PANE="$tmux_pane_id"
     fi
     
     # Run container with remaining arguments passed to claude
-    run_claudebox_container "$container_name" "interactive" "$@"
+    run_claudecircle_container "$container_name" "interactive" "$@"
 }
 
 _cmd_revoke() {
@@ -147,7 +147,7 @@ _cmd_revoke() {
             
             if [ -d "$dir" ]; then
                 # Check if container is running
-                if docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+                if docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
                     info "Slot $idx is in use, skipping"
                 else
                     if [[ "$VERBOSE" == "true" ]]; then
@@ -197,7 +197,7 @@ _cmd_revoke() {
             info "Slot $max doesn't exist. Counter adjusted to $new_max"
         else
             # Check if container is running
-            if docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+            if docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
                 error "Cannot revoke slot $max - it is currently in use"
             fi
             
@@ -229,7 +229,7 @@ _cmd_kill() {
     if [[ -z "$target" ]]; then
         logo_small
         echo
-        cecho "Kill running ClaudeBox containers:" "$CYAN"
+        cecho "Kill running ClaudeCircle containers:" "$CYAN"
         echo
         cecho "WARNING: This forcefully terminates containers!" "$YELLOW"
         echo
@@ -243,7 +243,7 @@ _cmd_kill() {
         echo
         for ((idx=1; idx<=max; idx++)); do
             local name=$(generate_container_name "$PROJECT_DIR" "$idx")
-            local full_container="claudebox-$(basename "$parent")-${name}"
+            local full_container="claudecircle-$(basename "$parent")-${name}"
             
             if docker ps --format "{{.Names}}" | grep -q "^${full_container}$"; then
                 printf "  Slot %d: %s\n" "$idx" "$name"
@@ -256,12 +256,12 @@ _cmd_kill() {
         else
             echo
             cecho "Usage:" "$YELLOW"
-            echo "  claudebox kill <slot-hash>  # Kill specific container"
-            echo "  claudebox kill all          # Kill all containers"
+            echo "  claudecircle kill <slot-hash>  # Kill specific container"
+            echo "  claudecircle kill all          # Kill all containers"
             echo
             cecho "Example:" "$DIM"
-            echo "  claudebox kill 337503c6    # Kill container by slot hash"
-            echo "  claudebox kill all          # Kill all running containers"
+            echo "  claudecircle kill 337503c6    # Kill container by slot hash"
+            echo "  claudecircle kill all          # Kill all running containers"
         fi
         echo
         return 0
@@ -271,7 +271,7 @@ _cmd_kill() {
     if [[ "$target" == "all" ]]; then
         local parent=$(get_parent_dir "$PROJECT_DIR")
         local project_name=$(basename "$parent")
-        local containers=$(docker ps --format "{{.Names}}" | grep "^claudebox-${project_name}-" || true)
+        local containers=$(docker ps --format "{{.Names}}" | grep "^claudecircle-${project_name}-" || true)
         
         if [[ -z "$containers" ]]; then
             info "No running containers to kill"
@@ -292,7 +292,7 @@ _cmd_kill() {
     # Kill specific container by slot hash
     local parent=$(get_parent_dir "$PROJECT_DIR")
     local project_name=$(basename "$parent")
-    local full_container="claudebox-${project_name}-${target}"
+    local full_container="claudecircle-${project_name}-${target}"
     
     if docker ps --format "{{.Names}}" | grep -q "^${full_container}$"; then
         warn "Killing container: $full_container"
@@ -300,7 +300,7 @@ _cmd_kill() {
         success "Container killed"
     else
         error "Container not found: $target"
-        echo "Run 'claudebox kill' to see running containers"
+        echo "Run 'claudecircle kill' to see running containers"
     fi
     echo
 }

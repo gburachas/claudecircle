@@ -14,8 +14,8 @@ _cmd_profiles() {
     
     # Show commands at the top
     printf '%s\n' "Commands:"
-    printf "  ${CYAN}claudebox add <profiles...>${NC}    - Add development profiles to your project\n"
-    printf "  ${CYAN}claudebox remove <profiles...>${NC} - Remove profiles from your project\n"
+    printf "  ${CYAN}claudecircle add <profiles...>${NC}    - Add development profiles to your project\n"
+    printf "  ${CYAN}claudecircle remove <profiles...>${NC} - Remove profiles from your project\n"
     printf '\n'
     
     # Show currently enabled profiles
@@ -54,7 +54,7 @@ _cmd_profile() {
     # Profile menu/help
     logo_small
     echo
-    cecho "ClaudeBox Profile Management:" "$CYAN"
+    cecho "ClaudeCircle Profile Management:" "$CYAN"
     echo
     echo -e "  ${GREEN}profiles${NC}                 Show all available profiles"
     echo -e "  ${GREEN}add <names...>${NC}           Add development profiles"
@@ -62,10 +62,10 @@ _cmd_profile() {
     echo -e "  ${GREEN}add status${NC}               Show current project's profiles"
     echo
     cecho "Examples:" "$YELLOW"
-    echo "  claudebox profiles              # See all available profiles"
-    echo "  claudebox add python rust       # Add Python and Rust profiles"
-    echo "  claudebox remove rust           # Remove Rust profile"
-    echo "  claudebox add status            # Check current project's profiles"
+    echo "  claudecircle profiles              # See all available profiles"
+    echo "  claudecircle add python rust       # Add Python and Rust profiles"
+    echo "  claudecircle remove rust           # Remove Rust profile"
+    echo "  claudecircle add status            # Check current project's profiles"
     echo
     exit 0
 }
@@ -125,7 +125,7 @@ _cmd_add() {
         fi
     done
 
-    [[ ${#selected[@]} -eq 0 ]] && error "No valid profiles specified\nRun 'claudebox profiles' to see available profiles"
+    [[ ${#selected[@]} -eq 0 ]] && error "No valid profiles specified\nRun 'claudecircle profiles' to see available profiles"
 
     update_profile_section "$profile_file" "profiles" "${selected[@]}"
 
@@ -199,7 +199,7 @@ _cmd_remove() {
             cecho "Currently Enabled Profiles:" "$YELLOW"
             echo -e "  ${current_profiles[*]}"
             echo
-            echo "Usage: claudebox remove <profile1> [profile2] ..."
+            echo "Usage: claudecircle remove <profile1> [profile2] ..."
         else
             echo "No profiles currently enabled."
         fi
@@ -302,7 +302,7 @@ _cmd_remove() {
 }
 
 _cmd_install() {
-    [[ $# -eq 0 ]] && error "No packages specified. Usage: claudebox install <package1> <package2> ..."
+    [[ $# -eq 0 ]] && error "No packages specified. Usage: claudecircle install <package1> <package2> ..."
 
     local profile_file
     profile_file=$(get_profile_file_path)
