@@ -31,7 +31,7 @@ parse_cli_args() {
     # Single parsing loop - each arg goes into exactly ONE bucket
     local found_script_command=false
     
-    for arg in "${all_args[@]}"; do
+    for arg in "${all_args[@]:-}"; do
         if [[ " ${HOST_ONLY_FLAGS[*]} " == *" $arg "* ]]; then
             # Bucket 1: Host-only flags
             host_flags+=("$arg")
