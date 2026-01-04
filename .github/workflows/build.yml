@@ -28,7 +28,7 @@ jobs:
           export TEST_HOME=$(mktemp -d)
           export HOME="$TEST_HOME"
           echo "Testing installation in $HOME"
-          bash ./claudecircle.run.sh
+          bash ./claudecircle.run
           ls -la ~/.claudecircle/scripts/bin/
           ~/.local/bin/claudecircle --help || echo "OK (help displayed or no version flag)"
 
@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: claudecircle-installer
-          path: claudecircle.run.sh
+          path: claudecircle.run
 
   release:
     needs: test-installer
@@ -56,6 +56,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./claudecircle.run.sh
-          asset_name: claudecircle.run.sh
+          asset_path: ./claudecircle.run
+          asset_name: claudecircle.run
           asset_content_type: application/x-sh
