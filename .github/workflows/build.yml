@@ -24,6 +24,8 @@ jobs:
         run: bash .builder/build.sh
 
       - name: Test installer in temporary directory
+        env:
+          DEBUG_CI: true
         run: |
           export TEST_HOME=$(mktemp -d)
           export HOME="$TEST_HOME"
