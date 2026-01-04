@@ -126,7 +126,39 @@ main() {
     # Step 4: Debug output if verbose
     debug_parsed_args
     
-    # Step 4a: Check if this command even needs Docker
+    # Step 4a: Handle installer run (skip Docker checks)
+    if [[ "${CLAUDECIRCLE_INSTALLER_RUN:-}" == "true" ]]; then
+        # Check if this is first install or update
+        if [[ -f "$HOME/.claudecircle/.installed" ]]; then
+            # Update - just show brief message
+            logo_small
+            echo
+            cecho "ClaudeCircle updated successfully!" "$GREEN"
+            echo
+            echo "Run 'claudecircle' to start using ClaudeCircle."
+            echo
+        else
+            # First install - check if they have projects
+            local project_count
+            project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            if [[ $project_count -eq 0 ]]; then
+                # Show full welcome
+                show_first_time_welcome
+            else
+                # Has projects but no .installed file
+                logo_small
+                echo
+                cecho "ClaudeCircle installed successfully!" "$GREEN"
+                echo
+                echo "Run 'claudecircle' to start using ClaudeCircle."
+                echo
+            fi
+            touch "$HOME/.claudecircle/.installed"
+        fi
+        exit 0
+    fi
+
+    # Step 4b: Check if this command even needs Docker
     local cmd_requirements="none"
     if [[ -n "${CLI_SCRIPT_COMMAND}" ]]; then
         # Pass the first pass-through arg as potential subcommand
@@ -230,37 +262,7 @@ main() {
         fi
     fi
     
-    # If running from installer, show appropriate message and exit
-    if [[ "${CLAUDECIRCLE_INSTALLER_RUN:-}" == "true" ]]; then
-        # Check if this is first install or update
-        if [[ -f "$HOME/.claudecircle/.installed" ]]; then
-            # Update - just show brief message
-            logo_small
-            echo
-            cecho "ClaudeCircle updated successfully!" "$GREEN"
-            echo
-            echo "Run 'claudecircle' to start using ClaudeCircle."
-            echo
-        else
-            # First install - check if they have projects
-            local project_count
-            project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-            if [[ $project_count -eq 0 ]]; then
-                # Show full welcome
-                show_first_time_welcome
-            else
-                # Has projects but no .installed file
-                logo_small
-                echo
-                cecho "ClaudeCircle installed successfully!" "$GREEN"
-                echo
-                echo "Run 'claudecircle' to start using ClaudeCircle."
-                echo
-            fi
-            touch "$HOME/.claudecircle/.installed"
-        fi
-        exit 0
-    fi
+
     
     # Step 6: Initialize project directory (creates parent with profiles.ini)
     init_project_dir "$PROJECT_DIR"
