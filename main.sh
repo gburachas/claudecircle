@@ -147,7 +147,7 @@ main() {
     # Step 5: Docker checks
     local docker_status
     docker_status=$(check_docker; echo $?)
-    case $docker_status in
+    case "$docker_status" in
         1) install_docker ;;
         2)
             warn "Docker is installed but not running."
@@ -216,8 +216,7 @@ main() {
             
         # Check if this is truly a first-time setup (no projects exist)
         local project_count
-        # shellcheck disable=SC2012
-        project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
+        project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
         
         if [[ $project_count -eq 0 ]]; then
             # First-time user - show welcome menu
@@ -245,8 +244,7 @@ main() {
         else
             # First install - check if they have projects
             local project_count
-            # shellcheck disable=SC2012
-            project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
+            project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
             if [[ $project_count -eq 0 ]]; then
                 # Show full welcome
                 show_first_time_welcome

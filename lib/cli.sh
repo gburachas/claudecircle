@@ -32,27 +32,53 @@ parse_cli_args() {
     local found_script_command=false
     
     for arg in "${all_args[@]:-}"; do
-        if [[ " ${HOST_ONLY_FLAGS[*]} " == *" $arg "* ]]; then
-            # Bucket 1: Host-only flags
-            host_flags+=("$arg")
-        elif [[ " ${CONTROL_FLAGS[*]} " == *" $arg "* ]]; then
-            # Bucket 2: Control flags (pass to container)
-            control_flags+=("$arg")
-        elif [[ "$found_script_command" == "false" ]] && [[ " ${SCRIPT_COMMANDS[*]} " == *" $arg "* ]]; then
-            # Bucket 3: Script commands (first one wins)
-            script_command="$arg"
-            found_script_command=true
-        else
-            # Bucket 4: Pass-through (everything else)
-            pass_through+=("$arg")
+        # Check for host flags
+        local is_host=false
+        for flag in "${HOST_ONLY_FLAGS[@]}"; do
+            if [[ "$arg" == "$flag" ]]; then
+                host_flags+=("$arg")
+                is_host=true
+                break
+            fi
+        done
+        [[ "$is_host" == "true" ]] && continue
+
+        # Check for control flags
+        local is_control=false
+        for flag in "${CONTROL_FLAGS[@]}"; do
+            if [[ "$arg" == "$flag" ]]; then
+                control_flags+=("$arg")
+                is_control=true
+                break
+            fi
+        done
+        [[ "$is_control" == "true" ]] && continue
+
+        # Check for script command (first one wins)
+        if [[ "$found_script_command" == "false" ]]; then
+            local is_cmd=false
+            for cmd in "${SCRIPT_COMMANDS[@]}"; do
+                if [[ "$arg" == "$cmd" ]]; then
+                    script_command="$arg"
+                    found_script_command=true
+                    is_cmd=true
+                    break
+                fi
+            done
+            [[ "$is_cmd" == "true" ]] && continue
         fi
+
+        # Pass-through (everything else)
+        pass_through+=("$arg")
     done
     
-    # Export results for use by main script
-    export CLI_HOST_FLAGS=("${host_flags[@]:-}")
-    export CLI_CONTROL_FLAGS=("${control_flags[@]:-}")
-    export CLI_SCRIPT_COMMAND="$script_command"
-    export CLI_PASS_THROUGH=("${pass_through[@]:-}")
+    # Set global variables (do not export arrays as it is not portable)
+    CLI_HOST_FLAGS=("${host_flags[@]:-}")
+    CLI_CONTROL_FLAGS=("${control_flags[@]:-}")
+    CLI_SCRIPT_COMMAND="$script_command"
+    CLI_PASS_THROUGH=("${pass_through[@]:-}")
+    
+    export CLI_SCRIPT_COMMAND
 }
 
 # Process host-only flags and set environment variables
