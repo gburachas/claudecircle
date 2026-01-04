@@ -49,10 +49,10 @@ parse_cli_args() {
     done
     
     # Export results for use by main script
-    export CLI_HOST_FLAGS=("${host_flags[@]}")
-    export CLI_CONTROL_FLAGS=("${control_flags[@]}")
+    export CLI_HOST_FLAGS=("${host_flags[@]:-}")
+    export CLI_CONTROL_FLAGS=("${control_flags[@]:-}")
     export CLI_SCRIPT_COMMAND="$script_command"
-    export CLI_PASS_THROUGH=("${pass_through[@]}")
+    export CLI_PASS_THROUGH=("${pass_through[@]:-}")
 }
 
 # Process host-only flags and set environment variables
