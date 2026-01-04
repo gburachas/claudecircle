@@ -192,7 +192,8 @@ main() {
         
         # Create core Dockerfile
         local core_dockerfile="$build_context/Dockerfile.core"
-        local base_dockerfile=$(cat "${root_dir}/build/Dockerfile") || error "Failed to read base Dockerfile"
+        local base_dockerfile
+        base_dockerfile=$(cat "${root_dir}/build/Dockerfile") || error "Failed to read base Dockerfile"
         
         # Remove profile installations and labels placeholders for core
         local core_dockerfile_content="$base_dockerfile"
@@ -214,7 +215,9 @@ main() {
             
             
         # Check if this is truly a first-time setup (no projects exist)
-        local project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
+        local project_count
+        # shellcheck disable=SC2012
+        project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
         
         if [[ $project_count -eq 0 ]]; then
             # First-time user - show welcome menu
@@ -241,7 +244,9 @@ main() {
             echo
         else
             # First install - check if they have projects
-            local project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
+            local project_count
+            # shellcheck disable=SC2012
+            project_count=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
             if [[ $project_count -eq 0 ]]; then
                 # Show full welcome
                 show_first_time_welcome

@@ -57,7 +57,7 @@ parse_cli_args() {
 
 # Process host-only flags and set environment variables
 process_host_flags() {
-    for flag in "${CLI_HOST_FLAGS[@]}"; do
+    for flag in "${CLI_HOST_FLAGS[@]:-}"; do
         case "$flag" in
             --verbose)
                 export VERBOSE=true
