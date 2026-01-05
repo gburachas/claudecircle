@@ -158,7 +158,11 @@ main() {
                 echo "Run 'claudecircle' to start using ClaudeCircle."
                 echo
             fi
+            mkdir -p "$HOME/.claudecircle"
             touch "$HOME/.claudecircle/.installed"
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then
+                echo "[DEBUG] Created .installed marker" >&2
+            fi
         fi
         exit 0
     fi
