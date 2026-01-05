@@ -22,8 +22,19 @@ The Ultimate Claude Code Docker Development Environment - Run Claude AI's coding
  ╚═════╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═════╝
 ```
 
-## 🚀 What's New in Latest Update
+## 🚀 What's New in ClaudeCircle (v2.0.0)
 
+ClaudeCircle is the next evolution of ClaudeBox, featuring:
+
+- **Multi-Slot Container System**: Run multiple authenticated Claude instances per project simultaneously
+  - `claudecircle create` - Create new container slots
+  - `claudecircle slots` - View all slots with auth status
+  - `claudecircle slot <n>` - Launch specific numbered slot
+- **Project Slot Management**: Each slot maintains separate authentication and state
+- **Enhanced Agent SDK**: New `/ccircle` commands for agent development workflows
+- **Tutorial Documentation**: Comprehensive guides for single-agent and multi-agent setups
+- **Improved CI/CD**: Robust Bash 3.2 compatibility tests and shellcheck validation
+- **Renamed from ClaudeBox**: All references updated to ClaudeCircle
 - **Enhanced UI/UX**: Improved menu alignment and comprehensive info display
 - **New `profiles` Command**: Quick listing of all available profiles with descriptions
 - **Firewall Management**: New `allowlist` command to view/edit network allowlists
