@@ -7,8 +7,8 @@ show_welcome_screen() {
     echo
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                                                                               ║${NC}"
-    echo -e "${CYAN}║${NC}  ${WHITE}█▀▀ █   ▄▀█ █ █ █▀▄ █▀▀ █▄▄ █▀█ ▀▄▀${NC}   ${CYAN}Docker Environment for ClaudeCircle${NC}  ${CYAN}║${NC}"
-    echo -e "${CYAN}║${NC}  ${WHITE}█▄▄ █▄▄ █▀█ █▄█ █▄▀ ██▄ █▄█ █▄█ █ █${NC}   ${DIM}Isolated • Secure • Powerful${NC}      ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}  ${WHITE}█▀▀ █   ▄▀█ █ █ █▀▄ █▀▀ █▀▀ █ █▀█ █▀▀ █  █▀▀ ${NC}   ${CYAN}Docker Environment for ClaudeCircle${NC}  ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}  ${WHITE}█▄▄ █▄▄ █▀█ █▄█ █▄▀ ██▄ █▄▄ █ █▀▄ █▄▄ █▄ ██▄ ${NC}   ${DIM}Isolated • Secure • Powerful${NC}      ${CYAN}║${NC}"
     echo -e "${CYAN}║                                                                               ║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo
