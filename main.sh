@@ -136,6 +136,7 @@ main() {
         # Check if this is first install or update
         if [[ -f "$HOME/.claudecircle/.installed" ]]; then
             # Update - just show brief message
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Update path - showing update message" >&2; fi
             logo_small
             echo
             cecho "ClaudeCircle updated successfully!" "$GREEN"
@@ -144,13 +145,17 @@ main() {
             echo
         else
             # First install - check if they have projects
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] First install path" >&2; fi
             local project_count
             project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Project count: $project_count" >&2; fi
             if [[ $project_count -eq 0 ]]; then
                 # Show full welcome
+                if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Showing first time welcome" >&2; fi
                 show_first_time_welcome
             else
                 # Has projects but no .installed file
+                if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Has projects, showing install success" >&2; fi
                 logo_small
                 echo
                 cecho "ClaudeCircle installed successfully!" "$GREEN"
@@ -158,12 +163,14 @@ main() {
                 echo "Run 'claudecircle' to start using ClaudeCircle."
                 echo
             fi
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Creating .installed marker" >&2; fi
             mkdir -p "$HOME/.claudecircle"
             touch "$HOME/.claudecircle/.installed"
             if [[ "${DEBUG_CI:-false}" == "true" ]]; then
                 echo "[DEBUG] Created .installed marker" >&2
             fi
         fi
+        if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Exiting installer mode with 0" >&2; fi
         exit 0
     fi
 
