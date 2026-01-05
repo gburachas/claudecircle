@@ -528,7 +528,8 @@ sync_commands_to_project() {
         if [[ ! -f "$ccircle_checksum_file" ]]; then
             sync_ccircle=true
         else
-            local stored_ccircle=$(cat "$ccircle_checksum_file" 2>/dev/null || echo "")
+            local stored_ccircle
+            stored_ccircle=$(cat "$ccircle_checksum_file" 2>/dev/null || echo "")
             if [[ "$ccircle_checksum" != "$stored_ccircle" ]]; then
                 sync_ccircle=true
             fi
@@ -541,7 +542,8 @@ sync_commands_to_project() {
         if [[ ! -f "$user_checksum_file" ]]; then
             sync_user=true
         else
-            local stored_user=$(cat "$user_checksum_file" 2>/dev/null || echo "")
+            local stored_user
+            stored_user=$(cat "$user_checksum_file" 2>/dev/null || echo "")
             if [[ "$user_checksum" != "$stored_user" ]]; then
                 sync_user=true
             fi
@@ -562,7 +564,8 @@ sync_commands_to_project() {
         # Use find to handle subdirectories properly
         if cd "$ccircle_source"; then
             find . -type f | while read -r file; do
-                local dir=$(dirname "$file")
+                local dir
+                dir=$(dirname "$file")
                 mkdir -p "$commands_dir/ccircle/$dir"
                 cp "$file" "$commands_dir/ccircle/$file"
             done
@@ -586,7 +589,8 @@ sync_commands_to_project() {
         # Copy preserving directory structure
         if cd "$user_source"; then
             find . -type f | while read -r file; do
-                local dir=$(dirname "$file")
+                local dir
+                dir=$(dirname "$file")
                 mkdir -p "$commands_dir/user/$dir"
                 cp "$file" "$commands_dir/user/$file"
             done

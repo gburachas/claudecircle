@@ -68,7 +68,8 @@ setup_shared_commands() {
         # For existing files, only update if source is newer
         for file in "$commands_source"/*; do
             if [[ -f "$file" ]]; then
-                local basename=$(basename "$file")
+                local basename
+                basename=$(basename "$file")
                 local dest_file="$shared_commands/$basename"
                 if [[ -f "$dest_file" ]] && [[ "$file" -nt "$dest_file" ]]; then
                     cp "$file" "$dest_file"
@@ -137,7 +138,8 @@ calculate_docker_layer_checksums() {
     local combined_content=""
     for file in "$root_dir/build/docker-entrypoint" "$root_dir/build/init-firewall"; do
         if [[ -f "$file" ]]; then
-            local file_md5=$(md5_file "$file")
+            local file_md5
+            file_md5=$(md5_file "$file")
             if [[ "$VERBOSE" == "true" ]]; then
                 echo "[DEBUG] File: $file, MD5: $file_md5" >&2
             fi
