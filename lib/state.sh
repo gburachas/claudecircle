@@ -41,7 +41,7 @@ update_symlink() {
             echo ""
             info "Then reload your shell or run: source ~/.zshrc"
             echo ""
-            exit 0
+            # Don't exit here - let installer check handle the exit if running as installer
         fi
     else
         warn "Could not create symlink at $LINK_TARGET"
@@ -190,7 +190,8 @@ needs_docker_rebuild() {
     fi
     
     # Calculate current layer checksums
-    local current_checksums=$(calculate_docker_layer_checksums "$project_dir")
+    local current_checksums
+    current_checksums=$(calculate_docker_layer_checksums "$project_dir")
     
     # If no checksum file, need rebuild
     if [[ ! -f "$checksum_file" ]]; then
@@ -201,7 +202,8 @@ needs_docker_rebuild() {
     fi
     
     # Compare layer checksums
-    local stored_checksums=$(cat "$checksum_file" 2>/dev/null || echo "")
+    local stored_checksums
+    stored_checksums=$(cat "$checksum_file" 2>/dev/null || echo "")
     if [[ "$current_checksums" != "$stored_checksums" ]]; then
         if [[ "$VERBOSE" == "true" ]]; then
             echo "[DEBUG] Layer checksums changed, rebuild needed" >&2
@@ -216,7 +218,8 @@ needs_docker_rebuild() {
             while IFS= read -r current_line; do
                 local layer="${current_line%%:*}"
                 local current_hash="${current_line#*:}"
-                local stored_hash=$(echo "$stored_checksums" | grep "^$layer:" | cut -d: -f2)
+                local stored_hash
+                stored_hash=$(echo "$stored_checksums" | grep "^$layer:" | cut -d: -f2)
                 if [[ "$current_hash" != "$stored_hash" ]]; then
                     echo "[DEBUG]   $layer: $stored_hash → $current_hash" >&2
                     if [[ "$layer" == "dockerfile" ]] || [[ "$layer" == "scripts" ]]; then
@@ -229,7 +232,8 @@ needs_docker_rebuild() {
             while IFS= read -r current_line; do
                 local layer="${current_line%%:*}"
                 local current_hash="${current_line#*:}"
-                local stored_hash=$(echo "$stored_checksums" | grep "^$layer:" | cut -d: -f2)
+                local stored_hash
+                stored_hash=$(echo "$stored_checksums" | grep "^$layer:" | cut -d: -f2)
                 if [[ "$current_hash" != "$stored_hash" ]]; then
                     if [[ "$layer" == "dockerfile" ]] || [[ "$layer" == "scripts" ]]; then
                         templates_changed=true
@@ -261,7 +265,8 @@ save_docker_layer_checksums() {
     if [[ "$VERBOSE" == "true" ]]; then
         echo "[DEBUG] save_docker_layer_checksums called" >&2
     fi
-    local checksums=$(calculate_docker_layer_checksums "$project_dir")
+    local checksums
+    checksums=$(calculate_docker_layer_checksums "$project_dir")
     
     echo "$checksums" > "$checksum_file"
     if [[ "$VERBOSE" == "true" ]]; then
