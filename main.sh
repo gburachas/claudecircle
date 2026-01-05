@@ -146,8 +146,10 @@ main() {
         else
             # First install - check if they have projects
             if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] First install path" >&2; fi
-            local project_count
-            project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            local project_count=0
+            if [[ -d "$HOME/.claudecircle/projects" ]]; then
+                project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            fi
             if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Project count: $project_count" >&2; fi
             if [[ $project_count -eq 0 ]]; then
                 # Show full welcome
