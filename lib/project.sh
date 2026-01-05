@@ -270,7 +270,8 @@ get_project_folder_name() {
 
 # Get Docker image name for a specific slot
 get_image_name() {
-    local parent_folder_name=$(generate_parent_folder_name "${PROJECT_DIR}")
+    local parent_folder_name
+    parent_folder_name=$(generate_parent_folder_name "${PROJECT_DIR}")
     printf 'claudecircle-%s' "${parent_folder_name}"
 }
 
@@ -282,7 +283,8 @@ _get_project_slug() {
 # Get project by path - now checks parent directories
 get_project_by_path() {
     local search_path="$1"
-    local abs_path=$(realpath "$search_path" 2>/dev/null || echo "$search_path")
+    local abs_path
+    abs_path=$(realpath "$search_path" 2>/dev/null || echo "$search_path")
     
     # Check all parent directories in ~/.claudecircle/projects/
     for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
@@ -308,7 +310,8 @@ list_all_projects() {
         [[ -d "$parent_dir" ]] || continue
         projects_found=1
         
-        local parent_name=$(basename "$parent_dir")
+        local parent_name
+        parent_name=$(basename "$parent_dir")
         local profiles_file="$parent_dir/profiles.ini"
         local slot_count=0
         local active_slots=0
@@ -352,7 +355,8 @@ resolve_project_path() {
     fi
     
     # Otherwise, get the parent directory for this path
-    local parent_name=$(get_project_folder_name "$input_path")
+    local parent_name
+    parent_name=$(get_project_folder_name "$input_path")
     echo "$parent_name"
     return 0
 }
@@ -364,13 +368,16 @@ resolve_project_path() {
 # Auto-prune counter to remove trailing missing slots
 prune_slot_counter() {
     local path="$1"
-    local parent=$(get_parent_dir "$path")
-    local max=$(read_counter "$parent")
+    local parent
+    parent=$(get_parent_dir "$path")
+    local max
+    max=$(read_counter "$parent")
     
     # Find highest existing slot
     local highest=0
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         local dir="$parent/$name"
         if [ -d "$dir" ]; then
             highest=$idx
@@ -388,7 +395,8 @@ prune_slot_counter() {
 # List all slots for current project
 list_project_slots() {
     local path="${1:-$PWD}"
-    local parent=$(get_parent_dir "$path")
+    local parent
+    parent=$(get_parent_dir "$path")
     
     if [ ! -d "$parent" ]; then
         echo "No project found for path: $path"
@@ -397,7 +405,8 @@ list_project_slots() {
     
     # Prune counter first
     prune_slot_counter "$path"
-    local max=$(read_counter "$parent")
+    local max
+    max=$(read_counter "$parent")
     
     logo_small
     echo
@@ -430,7 +439,8 @@ list_project_slots() {
     printf "  ────   ─────────────────     ─────────  ────────\n"
     
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         local dir="$parent/$name"
         local auth_icon="💀"
         local auth_text="Removed"
@@ -470,8 +480,10 @@ list_project_slots() {
 get_slot_dir() {
     local path="$1"
     local idx="${2:-0}"
-    local parent=$(get_parent_dir "$path")
-    local name=$(generate_container_name "$path" "$idx")
+    local parent
+    parent=$(get_parent_dir "$path")
+    local name
+    name=$(generate_container_name "$path" "$idx")
     echo "$parent/$name"
 }
 
@@ -479,11 +491,14 @@ get_slot_dir() {
 get_slot_index() {
     local slot_name="$1"
     local parent_dir="$2"
-    local path=$(dirname "$parent_dir")  # Get original path from parent
-    local max=$(read_counter "$parent_dir")
+    local path
+    path=$(dirname "$parent_dir")  # Get original path from parent
+    local max
+    max=$(read_counter "$parent_dir")
     
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         if [[ "$name" == "$slot_name" ]]; then
             echo "$idx"
             return 0
