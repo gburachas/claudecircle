@@ -128,6 +128,9 @@ main() {
     
     # Step 4a: Handle installer run (skip Docker checks)
     if [[ "${CLAUDECIRCLE_INSTALLER_RUN:-}" == "true" ]]; then
+        if [[ "${DEBUG_CI:-false}" == "true" ]]; then
+            echo "[DEBUG] Running in installer mode" >&2
+        fi
         # Check if this is first install or update
         if [[ -f "$HOME/.claudecircle/.installed" ]]; then
             # Update - just show brief message
@@ -393,7 +396,8 @@ main() {
         
         if [[ "$need_rebuild" == "true" ]]; then
             # Set rebuild timestamp to bust Docker cache when templates change
-            export CLAUDECIRCLE_REBUILD_TIMESTAMP=$(date +%s)
+            export CLAUDECIRCLE_REBUILD_TIMESTAMP
+            CLAUDECIRCLE_REBUILD_TIMESTAMP=$(date +%s)
             if [[ "$VERBOSE" == "true" ]]; then
                 echo "[DEBUG] About to build Docker image..." >&2
             fi
@@ -441,7 +445,8 @@ main() {
         # No script command - running Claude interactively
         # This is where we load saved default flags
         if [[ -n "${PROJECT_SLOT_DIR:-}" ]]; then
-            local slot_name=$(basename "$PROJECT_SLOT_DIR")
+            local slot_name
+            slot_name=$(basename "$PROJECT_SLOT_DIR")
             # parent_folder_name already set in step 8
             local container_name="claudecircle-${parent_folder_name}-${slot_name}"
             
