@@ -28,8 +28,10 @@ get_script_path() {
     echo "$(cd -P "$(dirname "$source")" && pwd)/$(basename "$source")"
 }
 
-readonly SCRIPT_PATH="$(get_script_path)"
-readonly SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+SCRIPT_PATH="$(get_script_path)"
+readonly SCRIPT_PATH
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+readonly SCRIPT_DIR
 # Now that script is at root, SCRIPT_DIR is the repo/install root
 readonly INSTALL_ROOT="$HOME/.claudecircle"
 export SCRIPT_PATH
@@ -239,7 +241,7 @@ main() {
         
         # Build core image
         docker build \
-            --progress=${BUILDKIT_PROGRESS:-auto} \
+            --progress="${BUILDKIT_PROGRESS:-auto}" \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --build-arg USER_ID="$USER_ID" \
             --build-arg GROUP_ID="$GROUP_ID" \
@@ -277,7 +279,8 @@ main() {
     
     # Step 8: Always set up project variables
     # Get the actual parent folder name for the project
-    local parent_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
+    local parent_folder_name
+    parent_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
     
     # Get the slot to use (might be empty)
     project_folder_name=$(get_project_folder_name "$PROJECT_DIR")
@@ -307,7 +310,8 @@ main() {
     
     # Step 9: Run pre-flight validation for commands that need Docker
     if [[ -n "${CLI_SCRIPT_COMMAND}" ]]; then
-        local cmd_req=$(get_command_requirements "${CLI_SCRIPT_COMMAND}")
+        local cmd_req
+        cmd_req=$(get_command_requirements "${CLI_SCRIPT_COMMAND}")
         # Only run pre-flight for commands that need Docker or image
         if [[ "$cmd_req" == "docker" ]] || [[ "$cmd_req" == "image" ]]; then
             if ! preflight_check "${CLI_SCRIPT_COMMAND}" "${CLI_PASS_THROUGH[@]}"; then
@@ -384,7 +388,8 @@ main() {
                     docker_profiles_hash=$(printf '%s\n' "${docker_profiles[@]}" | sort | cksum | cut -d' ' -f1)
                 fi
                 
-                local image_profiles_hash=$(docker inspect "$IMAGE_NAME" --format '{{index .Config.Labels "claudecircle.profiles"}}' 2>/dev/null || echo "")
+                local image_profiles_hash
+                image_profiles_hash=$(docker inspect "$IMAGE_NAME" --format '{{index .Config.Labels "claudecircle.profiles"}}' 2>/dev/null || echo "")
                 
                 if [[ "$docker_profiles_hash" != "$image_profiles_hash" ]]; then
                     info "Docker-affecting profiles changed, rebuilding..."
