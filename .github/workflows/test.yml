@@ -68,7 +68,7 @@ jobs:
         ./claudecircle.run --help | grep "ClaudeCircle"
         
     - name: Upload installer artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: claudecircle-installer
         path: claudecircle.run
