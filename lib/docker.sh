@@ -64,7 +64,7 @@ configure_docker_nonroot() {
     success "Docker configured for non-root usage!"
     warn "You need to log out and back in for group changes to take effect."
     warn "Or run: ${CYAN}newgrp docker"
-    warn "Then run 'claudebox' again."
+    warn "Then run 'claudecircle' again."
     info "Trying to activate docker group in current shell..."
     exec newgrp docker
 }
@@ -77,15 +77,15 @@ docker_exec_user() {
     docker exec -u "$DOCKER_USER" "$@"
 }
 
-# run_claudebox_container - Main entry point for container execution
-# Usage: run_claudebox_container <container_name> <mode> [args...]
+# run_claudecircle_container - Main entry point for container execution
+# Usage: run_claudecircle_container <container_name> <mode> [args...]
 # Args:
 #   container_name: Name for the container (empty for auto-generated)
 #   mode: "interactive", "detached", "pipe", or "attached"
 #   args: Commands to pass to claude in container
 # Returns: Exit code from container
 # Note: Handles all mounting, environment setup, and security configuration
-run_claudebox_container() {
+run_claudecircle_container() {
     local container_name="$1"
     local run_mode="$2"  # "interactive", "detached", "pipe", or "attached"
     shift 2
@@ -94,7 +94,7 @@ run_claudebox_container() {
     # Handle "attached" mode - start detached, wait, then attach
     if [[ "$run_mode" == "attached" ]]; then
         # Start detached
-        run_claudebox_container "$container_name" "detached" "${container_args[@]}" >/dev/null
+        run_claudecircle_container "$container_name" "detached" "${container_args[@]}" >/dev/null
         
         # Show progress while container initializes
         fillbar
@@ -218,7 +218,7 @@ run_claudebox_container() {
     docker_args+=(
         -w /workspace
         -v "$PROJECT_DIR":/workspace
-        -v "$PROJECT_PARENT_DIR":/home/$DOCKER_USER/.claudebox
+        -v "$PROJECT_PARENT_DIR":/home/$DOCKER_USER/.claudecircle
     )
     
     # Ensure .claude directory exists
@@ -267,7 +267,7 @@ run_claudebox_container() {
         local temp_file="$2"
         
         # Create temporary file with unique name
-        local mcp_file=$(mktemp /tmp/claudebox-mcp-$(date +%s)-$$.json 2>/dev/null || mktemp)
+        local mcp_file=$(mktemp /tmp/claudecircle-mcp-$(date +%s)-$$.json 2>/dev/null || mktemp)
         mcp_temp_files+=("$mcp_file")
         
         # Extract mcpServers if they exist
@@ -301,10 +301,10 @@ run_claudebox_container() {
                 rm -f "$file"
             fi
         done
-        if [[ -n "$user_mcp_file" ]] && [[ -f "$user_mcp_file" ]]; then
+        if [[ -n "${user_mcp_file:-}" ]] && [[ -f "${user_mcp_file:-}" ]]; then
             rm -f "$user_mcp_file"
         fi
-        if [[ -n "$project_mcp_file" ]] && [[ -f "$project_mcp_file" ]]; then
+        if [[ -n "${project_mcp_file:-}" ]] && [[ -f "${project_mcp_file:-}" ]]; then
             rm -f "$project_mcp_file"
         fi
     }
@@ -333,7 +333,7 @@ run_claudebox_container() {
     
     # Create project MCP config file by merging project configs
     # Start with empty config file for merging
-    local temp_project_file=$(mktemp /tmp/claudebox-project-temp-$(date +%s)-$$.json 2>/dev/null || mktemp)
+    local temp_project_file=$(mktemp /tmp/claudecircle-project-temp-$(date +%s)-$$.json 2>/dev/null || mktemp)
     mcp_temp_files+=("$temp_project_file")
     echo '{"mcpServers":{}}' > "$temp_project_file"
     
@@ -384,13 +384,29 @@ run_claudebox_container() {
     docker_args+=(
         -e "NODE_ENV=${NODE_ENV:-production}"
         -e "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}"
-        -e "CLAUDEBOX_PROJECT_NAME=$project_name"
-        -e "CLAUDEBOX_SLOT_NAME=$slot_name"
+        -e "CLAUDECIRCLE_PROJECT_NAME=$project_name"
+        -e "CLAUDECIRCLE_SLOT_NAME=$slot_name"
         -e "TERM=${TERM:-xterm-256color}"
         -e "VERBOSE=${VERBOSE:-false}"
-        -e "CLAUDEBOX_WRAP_TMUX=${CLAUDEBOX_WRAP_TMUX:-false}"
-        -e "CLAUDEBOX_PANE_NAME=${CLAUDEBOX_PANE_NAME:-}"
-        -e "CLAUDEBOX_TMUX_PANE=${CLAUDEBOX_TMUX_PANE:-}"
+        -e "CLAUDECIRCLE_WRAP_TMUX=${CLAUDECIRCLE_WRAP_TMUX:-false}"
+        -e "CLAUDECIRCLE_PANE_NAME=${CLAUDECIRCLE_PANE_NAME:-}"
+        -e "CLAUDECIRCLE_TMUX_PANE=${CLAUDECIRCLE_TMUX_PANE:-}"
+        # Agent SDK / Cloud Provider Support
+        -e "CLAUDE_CODE_USE_BEDROCK=${CLAUDE_CODE_USE_BEDROCK:-}"
+        -e "CLAUDE_CODE_USE_VERTEX=${CLAUDE_CODE_USE_VERTEX:-}"
+        -e "CLAUDE_CODE_USE_FOUNDRY=${CLAUDE_CODE_USE_FOUNDRY:-}"
+        # AWS Credentials
+        -e "AWS_PROFILE=${AWS_PROFILE:-}"
+        -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}"
+        -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}"
+        -e "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}"
+        -e "AWS_REGION=${AWS_REGION:-}"
+        # Google Cloud Credentials
+        -e "GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}"
+        -e "GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}"
+        # Azure / Foundry Credentials
+        -e "AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}"
+        -e "AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}"
         --cap-add NET_ADMIN
         --cap-add NET_RAW
         "$IMAGE_NAME"
@@ -433,7 +449,7 @@ run_docker_build() {
     
     # Check if we need to force rebuild due to template changes
     local no_cache_flag=""
-    if [[ "${CLAUDEBOX_FORCE_NO_CACHE:-false}" == "true" ]]; then
+    if [[ "${CLAUDECIRCLE_FORCE_NO_CACHE:-false}" == "true" ]]; then
         no_cache_flag="--no-cache"
         info "Forcing full rebuild (templates changed)"
     fi
@@ -447,8 +463,8 @@ run_docker_build() {
         --build-arg USERNAME="$DOCKER_USER" \
         --build-arg NODE_VERSION="$NODE_VERSION" \
         --build-arg DELTA_VERSION="$DELTA_VERSION" \
-        --build-arg REBUILD_TIMESTAMP="${CLAUDEBOX_REBUILD_TIMESTAMP:-}" \
+        --build-arg REBUILD_TIMESTAMP="${CLAUDECIRCLE_REBUILD_TIMESTAMP:-}" \
         -f "$1" -t "$IMAGE_NAME" "$2" || error "Docker build failed"
 }
 
-export -f check_docker install_docker configure_docker_nonroot docker_exec_root docker_exec_user run_claudebox_container check_container_exists run_docker_build
+export -f check_docker install_docker configure_docker_nonroot docker_exec_root docker_exec_user run_claudecircle_container check_container_exists run_docker_build

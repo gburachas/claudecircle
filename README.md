@@ -1,8 +1,8 @@
-# ClaudeBox 🐳
+# ClaudeCircle 🐳
 
 [![Docker](https://img.shields.io/badge/Docker-Required-blue.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub](https://img.shields.io/badge/GitHub-RchGrav%2Fclaudebox-blue.svg)](https://github.com/RchGrav/claudebox)
+[![GitHub](https://img.shields.io/badge/GitHub-RchGrav%2Fclaudecircle-blue.svg)](https://github.com/RchGrav/claudecircle)
 
 The Ultimate Claude Code Docker Development Environment - Run Claude AI's coding assistant in a fully containerized, reproducible environment with pre-configured development profiles and MCP servers.
 
@@ -57,7 +57,7 @@ The Ultimate Claude Code Docker Development Environment - Run Claude AI's coding
 
 ## 🛠️ Installation
 
-ClaudeBox v2.0.0 offers two installation methods:
+ClaudeCircle v2.0.0 offers two installation methods:
 
 ### Method 1: Self-Extracting Installer (Recommended)
 
@@ -65,14 +65,14 @@ The self-extracting installer is ideal for automated setups and quick installati
 
 ```bash
 # Download the latest release
-wget https://github.com/RchGrav/claudebox/releases/latest/download/claudebox.run
-chmod +x claudebox.run
-./claudebox.run
+wget https://github.com/RchGrav/claudecircle/releases/latest/download/claudecircle.run
+chmod +x claudecircle.run
+./claudecircle.run
 ```
 
 This will:
-- Extract ClaudeBox to `~/.claudebox/source/`
-- Create a symlink at `~/.local/bin/claudebox` (you may need to add `~/.local/bin` to your PATH)
+- Extract ClaudeCircle to `~/.claudecircle/source/`
+- Create a symlink at `~/.local/bin/claudecircle` (you may need to add `~/.local/bin` to your PATH)
 - Show setup instructions if PATH configuration is needed
 
 ### Method 2: Archive Installation
@@ -81,18 +81,18 @@ For manual installation or custom locations, use the archive:
 
 ```bash
 # Download the archive
-wget https://github.com/RchGrav/claudebox/releases/latest/download/claudebox-2.0.0.tar.gz
+wget https://github.com/RchGrav/claudecircle/releases/latest/download/claudecircle-2.0.0.tar.gz
 
 # Extract to your preferred location
-mkdir -p ~/my-tools/claudebox
-tar -xzf claudebox-2.0.0.tar.gz -C ~/my-tools/claudebox
+mkdir -p ~/my-tools/claudecircle
+tar -xzf claudecircle-2.0.0.tar.gz -C ~/my-tools/claudecircle
 
 # Run main.sh to create symlink
-cd ~/my-tools/claudebox
+cd ~/my-tools/claudecircle
 ./main.sh
 
 # Or create your own symlink
-ln -s ~/my-tools/claudebox/main.sh ~/.local/bin/claudebox
+ln -s ~/my-tools/claudecircle/main.sh ~/.local/bin/claudecircle
 ```
 
 ### Development Installation
@@ -100,19 +100,19 @@ ln -s ~/my-tools/claudebox/main.sh ~/.local/bin/claudebox
 For development or testing the latest changes:
 ```bash
 # Clone the repository
-git clone https://github.com/RchGrav/claudebox.git
-cd claudebox
+git clone https://github.com/RchGrav/claudecircle.git
+cd claudecircle
 
 # Build the installer
 bash .builder/build.sh
 
 # Run the installer
-./claudebox.run
+./claudecircle.run
 ```
 
 ### PATH Configuration
 
-If `claudebox` command is not found after installation, add `~/.local/bin` to your PATH:
+If `claudecircle` command is not found after installation, add `~/.local/bin` to your PATH:
 
 ```bash
 # For Bash
@@ -125,8 +125,8 @@ source ~/.zshrc
 ```
 
 The installer will:
-- ✅ Extract ClaudeBox to `~/.claudebox/source/`
-- ✅ Create symlink at `~/.local/bin/claudebox`
+- ✅ Extract ClaudeCircle to `~/.claudecircle/source/`
+- ✅ Create symlink at `~/.local/bin/claudecircle`
 - ✅ Check for Docker (install if needed on first run)
 - ✅ Configure Docker for non-root usage (on first run)
 
@@ -137,41 +137,41 @@ The installer will:
 
 ```bash
 # Launch Claude Code CLI
-claudebox
+claudecircle
 
 # Pass arguments to Claude
-claudebox --model opus -c
+claudecircle --model opus -c
 
 # Save your arguments so you don't need to type them every time
-claudebox --model opus -c
+claudecircle --model opus -c
 
-# View the Claudebox info screen
-claudebox info
+# View the Claudecircle info screen
+claudecircle info
 
 # Get help
-claudebox --help        # Shows Claude help with ClaudeBox additions
+claudecircle --help        # Shows Claude help with ClaudeCircle additions
 ```
 
 ### Multi-Instance Support
 
-ClaudeBox supports running multiple instances in different projects simultaneously:
+ClaudeCircle supports running multiple instances in different projects simultaneously:
 
 ```bash
 # Terminal 1 - Project A
 cd ~/projects/website
-claudebox
+claudecircle
 
 # Terminal 2 - Project B
 cd ~/projects/api
-claudebox shell
+claudecircle shell
 
 # Terminal 3 - Project C
 cd ~/projects/ml-model
-claudebox profile python ml
+claudecircle profile python ml
 ```
 
 Each project maintains its own:
-- Docker image (`claudebox-<project-name>`)
+- Docker image (`claudecircle-<project-name>`)
 - Language profiles and installed packages
 - Firewall allowlist
 - Python virtual environment
@@ -180,22 +180,22 @@ Each project maintains its own:
 
 ### Development Profiles
 
-ClaudeBox includes 15+ pre-configured development environments:
+ClaudeCircle includes 15+ pre-configured development environments:
 
 ```bash
 # List all available profiles with descriptions
-claudebox profiles
+claudecircle profiles
 
 # Interactive profile management menu
-claudebox profile
+claudecircle profile
 
 # Check current project's profiles
-claudebox profile status
+claudecircle profile status
 
 # Install specific profiles (project-specific)
-claudebox profile python ml       # Python + Machine Learning
-claudebox profile c openwrt       # C/C++ + OpenWRT
-claudebox profile rust go         # Rust + Go
+claudecircle profile python ml       # Python + Machine Learning
+claudecircle profile c openwrt       # C/C++ + OpenWRT
+claudecircle profile rust go         # Rust + Go
 ```
 
 #### Available Profiles:
@@ -233,27 +233,27 @@ Save your preferred security flags to avoid typing them every time:
 
 ```bash
 # Save default flags
-claudebox save --enable-sudo --disable-firewall
+claudecircle save --enable-sudo --disable-firewall
 
 # Clear saved flags
-claudebox save
+claudecircle save
 
-# Now all claudebox commands will use your saved flags automatically
-claudebox  # Will run with sudo and firewall disabled
+# Now all claudecircle commands will use your saved flags automatically
+claudecircle  # Will run with sudo and firewall disabled
 ```
 
 ### Project Information
 
-View comprehensive information about your ClaudeBox setup:
+View comprehensive information about your ClaudeCircle setup:
 
 ```bash
 # Show detailed project and system information
-claudebox info
+claudecircle info
 ```
 
 The info command displays:
 - **Current Project**: Path, ID, and data directory
-- **ClaudeBox Installation**: Script location and symlink
+- **ClaudeCircle Installation**: Script location and symlink
 - **Saved CLI Flags**: Your default flags configuration
 - **Claude Commands**: Global and project-specific custom commands
 - **Project Profiles**: Installed profiles, packages, and available options
@@ -264,25 +264,25 @@ The info command displays:
 
 ```bash
 # Install additional packages (project-specific)
-claudebox install htop vim tmux
+claudecircle install htop vim tmux
 
 # Open a powerline zsh shell in the container
-claudebox shell
+claudecircle shell
 
 # Update Claude CLI
-claudebox update
+claudecircle update
 
 # View/edit firewall allowlist
-claudebox allowlist
+claudecircle allowlist
 ```
 
 ### Tmux Integration
 
-ClaudeBox provides tmux support for multi-pane workflows:
+ClaudeCircle provides tmux support for multi-pane workflows:
 
 ```bash
-# Launch ClaudeBox with tmux support
-claudebox tmux
+# Launch ClaudeCircle with tmux support
+claudecircle tmux
 
 # If you're already in a tmux session, the socket will be automatically mounted
 # Otherwise, tmux will be available inside the container
@@ -294,11 +294,11 @@ claudebox tmux
 # - Switch windows: Ctrl+b n/p or Ctrl+b 0-9
 ```
 
-ClaudeBox automatically detects and mounts existing tmux sockets from the host, or provides tmux functionality inside the container for powerful multi-context workflows.
+ClaudeCircle automatically detects and mounts existing tmux sockets from the host, or provides tmux functionality inside the container for powerful multi-context workflows.
 
 ### Task Engine
 
-ClaudeBox contains a compact task engine for reliable code generation tasks:
+ClaudeCircle contains a compact task engine for reliable code generation tasks:
 
 ```bash
 # In Claude, use the task command
@@ -314,46 +314,46 @@ ClaudeBox contains a compact task engine for reliable code generation tasks:
 
 ```bash
 # Run with sudo enabled (use with caution)
-claudebox --enable-sudo
+claudecircle --enable-sudo
 
 # Disable network firewall (allows all network access)
-claudebox --disable-firewall
+claudecircle --disable-firewall
 
 # Skip permission checks
-claudebox --dangerously-skip-permissions
+claudecircle --dangerously-skip-permissions
 ```
 
 ### Maintenance
 
 ```bash
 # Interactive clean menu
-claudebox clean
+claudecircle clean
 
 # Project-specific cleanup options
-claudebox clean --project          # Shows submenu with options:
+claudecircle clean --project          # Shows submenu with options:
   # profiles - Remove profile configuration (*.ini file)
   # data     - Remove project data (auth, history, configs, firewall)
   # docker   - Remove project Docker image
   # all      - Remove everything for this project
 
 # Global cleanup options
-claudebox clean --containers       # Remove ClaudeBox containers
-claudebox clean --image           # Remove containers and current project image
-claudebox clean --cache           # Remove Docker build cache
-claudebox clean --volumes         # Remove ClaudeBox volumes
-claudebox clean --all             # Complete Docker cleanup
+claudecircle clean --containers       # Remove ClaudeCircle containers
+claudecircle clean --image           # Remove containers and current project image
+claudecircle clean --cache           # Remove Docker build cache
+claudecircle clean --volumes         # Remove ClaudeCircle volumes
+claudecircle clean --all             # Complete Docker cleanup
 
 # Rebuild the image from scratch
-claudebox rebuild
+claudecircle rebuild
 ```
 
 ## 🔧 Configuration
 
-ClaudeBox stores data in:
+ClaudeCircle stores data in:
 - `~/.claude/` - Global Claude configuration (mounted read-only)
-- `~/.claudebox/` - Global ClaudeBox data
-- `~/.claudebox/profiles/` - Per-project profile configurations (*.ini files)
-- `~/.claudebox/<project-name>/` - Project-specific data:
+- `~/.claudecircle/` - Global ClaudeCircle data
+- `~/.claudecircle/profiles/` - Per-project profile configurations (*.ini files)
+- `~/.claudecircle/<project-name>/` - Project-specific data:
   - `.claude/` - Project auth state
   - `.claude.json` - Project API configuration
   - `.zsh_history` - Shell history
@@ -364,8 +364,8 @@ ClaudeBox stores data in:
 ### Project-Specific Features
 
 Each project automatically gets:
-- **Docker Image**: `claudebox-<project-name>` with installed profiles
-- **Profile Configuration**: `~/.claudebox/profiles/<project-name>.ini`
+- **Docker Image**: `claudecircle-<project-name>` with installed profiles
+- **Profile Configuration**: `~/.claudecircle/profiles/<project-name>.ini`
 - **Python Virtual Environment**: `.venv` created with uv when Python profile is active
 - **Firewall Allowlist**: Customizable per-project network access rules
 - **Claude Configuration**: Project-specific `.claude.json` settings
@@ -377,7 +377,7 @@ Each project automatically gets:
 
 ## 🏗️ Architecture
 
-ClaudeBox creates a per-project Debian-based Docker image with:
+ClaudeCircle creates a per-project Debian-based Docker image with:
 - Node.js (via NVM for version flexibility)
 - Claude Code CLI (@anthropic-ai/claude-code)
 - User account matching host UID/GID
@@ -403,62 +403,62 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🐛 Troubleshooting
 
 ### Docker Permission Issues
-ClaudeBox automatically handles Docker setup, but if you encounter issues:
+ClaudeCircle automatically handles Docker setup, but if you encounter issues:
 1. The script will add you to the docker group
 2. You may need to log out/in or run `newgrp docker`
-3. Run `claudebox` again
+3. Run `claudecircle` again
 
 ### Profile Installation Failed
 ```bash
 # Clean and rebuild for current project
-claudebox clean --project
-claudebox rebuild
-claudebox profile <name>
+claudecircle clean --project
+claudecircle rebuild
+claudecircle profile <name>
 ```
 
 ### Profile Changes Not Taking Effect
-ClaudeBox automatically detects profile changes and rebuilds when needed. If you're having issues:
+ClaudeCircle automatically detects profile changes and rebuilds when needed. If you're having issues:
 ```bash
 # Force rebuild
-claudebox rebuild
+claudecircle rebuild
 ```
 
 ### Python Virtual Environment Issues
-ClaudeBox automatically creates a venv when Python profile is active:
+ClaudeCircle automatically creates a venv when Python profile is active:
 ```bash
-# The venv is created at ~/.claudebox/<project>/.venv
+# The venv is created at ~/.claudecircle/<project>/.venv
 # It's automatically activated in the container
-claudebox shell
+claudecircle shell
 which python  # Should show the venv python
 ```
 
 ### Can't Find Command
 Ensure the symlink was created:
 ```bash
-ls -la ~/.local/bin/claudebox
+ls -la ~/.local/bin/claudecircle
 # Or manually create it
-ln -s /path/to/claudebox ~/.local/bin/claudebox
+ln -s /path/to/claudecircle ~/.local/bin/claudecircle
 ```
 
 ### Multiple Instance Conflicts
 Each project has its own Docker image and is fully isolated. To check status:
 ```bash
-# Check all ClaudeBox images and containers
-claudebox info
+# Check all ClaudeCircle images and containers
+claudecircle info
 
 # Clean project-specific data
-claudebox clean --project
+claudecircle clean --project
 ```
 
 ### Build Cache Issues
 If builds are slow or failing:
 ```bash
 # Clear Docker build cache
-claudebox clean --cache
+claudecircle clean --cache
 
 # Complete cleanup and rebuild
-claudebox clean --all
-claudebox
+claudecircle clean --all
+claudecircle
 ```
 
 ## 🎉 Acknowledgments

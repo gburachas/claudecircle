@@ -1,5 +1,5 @@
 ## Current Environment Tooling
-- @~/.claudebox/tooling.md
+- @~/.claudecircle/tooling.md
 
 ## Default Coding Behavior
 

@@ -11,14 +11,14 @@ readonly GROUP_ID=$(id -g)
 
 # Directories and paths
 PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
-readonly LINK_TARGET="$HOME/.local/bin/claudebox"
-export CLAUDEBOX_HOME="${HOME}/.claudebox"
+readonly LINK_TARGET="$HOME/.local/bin/claudecircle"
+export CLAUDECIRCLE_HOME="${HOME}/.claudecircle"
 
 # Version constants
 readonly NODE_VERSION="--lts"
 readonly DELTA_VERSION="0.17.0"
 
-# Script path resolution - moved to main claudebox.sh since it needs BASH_SOURCE
+# Script path resolution - moved to main claudecircle.sh since it needs BASH_SOURCE
 # SCRIPT_PATH will be set by main script
 
 # Export what other modules need

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # ==============================================================================
-#  ClaudeBox – Docker-based Claude CLI environment
+#  ClaudeCircle – Docker-based Claude CLI environment
 #
 #  Clean CLI implementation following the four-bucket architecture
 # ==============================================================================
 
 # Version
-readonly CLAUDEBOX_VERSION="2.0.0"
+# shellcheck disable=SC2034
+readonly CLAUDECIRCLE_VERSION="2.0.0"
 
 set -euo pipefail
 
 # Add error handler to show where script fails
+# shellcheck disable=SC2154
 trap 'exit_code=$?; [[ $exit_code -eq 130 ]] && exit 130 || { echo "Error at line $LINENO: Command failed with exit code $exit_code" >&2; echo "Failed command: $BASH_COMMAND" >&2; echo "Call stack:" >&2; for i in ${!BASH_LINENO[@]}; do if [[ $i -gt 0 ]]; then echo "  at ${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i-1]})" >&2; fi; done; }' ERR INT
 
 # ------------------------------------------------------------------ constants --
@@ -18,19 +20,22 @@ trap 'exit_code=$?; [[ $exit_code -eq 130 ]] && exit 130 || { echo "Error at lin
 get_script_path() {
     local source="${BASH_SOURCE[0]:-$0}"
     while [[ -L "$source" ]]; do
-        local dir="$(cd -P "$(dirname "$source")" && pwd)"
+        local dir
+        dir="$(cd -P "$(dirname "$source")" && pwd)"
         source="$(readlink "$source")"
         [[ $source != /* ]] && source="$dir/$source"
     done
     echo "$(cd -P "$(dirname "$source")" && pwd)/$(basename "$source")"
 }
 
-readonly SCRIPT_PATH="$(get_script_path)"
-readonly SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+SCRIPT_PATH="$(get_script_path)"
+readonly SCRIPT_PATH
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+readonly SCRIPT_DIR
 # Now that script is at root, SCRIPT_DIR is the repo/install root
-readonly INSTALL_ROOT="$HOME/.claudebox"
+readonly INSTALL_ROOT="$HOME/.claudecircle"
 export SCRIPT_PATH
-export CLAUDEBOX_SCRIPT_DIR="${SCRIPT_DIR}"
+export CLAUDECIRCLE_SCRIPT_DIR="${SCRIPT_DIR}"
 # Set PROJECT_DIR early (but allow override from environment)
 export PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 
@@ -53,23 +58,23 @@ done
 show_first_time_welcome() {
     logo_small
     printf '\n'
-    cecho "Welcome to ClaudeBox!" "$CYAN"
+    cecho "Welcome to ClaudeCircle!" "$CYAN"
     printf '\n'
-    printf '%s\n' "ClaudeBox is ready to use. Here's how to get started:"
+    printf '%s\n' "ClaudeCircle is ready to use. Here's how to get started:"
     printf '\n'
     printf '%s\n' "1. Navigate to your project directory:"
     printf "   ${CYAN}%s${NC}\n" "cd /path/to/your/project"
     printf '\n'
     printf '%s\n' "2. Create your first container slot:"
-    printf "   ${CYAN}%s${NC}\n" "claudebox create"
+    printf "   ${CYAN}%s${NC}\n" "claudecircle create"
     printf '\n'
     printf '%s\n' "3. Launch Claude:"
-    printf "   ${CYAN}%s${NC}\n" "claudebox"
+    printf "   ${CYAN}%s${NC}\n" "claudecircle"
     printf '\n'
     printf '%s\n' "Other useful commands:"
-    printf "  ${CYAN}%-20s${NC} - %s\n" "claudebox help" "Show all available commands"
-    printf "  ${CYAN}%-20s${NC} - %s\n" "claudebox profiles" "List available development profiles"
-    printf "  ${CYAN}%-20s${NC} - %s\n" "claudebox projects" "List all ClaudeBox projects"
+    printf "  ${CYAN}%-20s${NC} - %s\n" "claudecircle help" "Show all available commands"
+    printf "  ${CYAN}%-20s${NC} - %s\n" "claudecircle profiles" "List available development profiles"
+    printf "  ${CYAN}%-20s${NC} - %s\n" "claudecircle projects" "List all ClaudeCircle projects"
     printf '\n'
 }
 
@@ -87,7 +92,7 @@ main() {
     # Step 2: Parse ALL arguments
     parse_cli_args "$@"
     
-    # Step 3: Process host flags (sets VERBOSE, REBUILD, CLAUDEBOX_WRAP_TMUX)
+    # Step 3: Process host flags (sets VERBOSE, REBUILD, CLAUDECIRCLE_WRAP_TMUX)
     process_host_flags
     
     # Step 3a: Handle saved flags based on the first CLI argument
@@ -100,11 +105,11 @@ main() {
             ;;
         *)
             # Load and apply saved flags
-            if [[ -f "$HOME/.claudebox/default-flags" ]]; then
+            if [[ -f "$HOME/.claudecircle/default-flags" ]]; then
                 local saved_flags=()
                 while IFS= read -r flag; do
                     [[ -n "$flag" ]] && saved_flags+=("$flag")
-                done < "$HOME/.claudebox/default-flags"
+                done < "$HOME/.claudecircle/default-flags"
                 
                 if [[ ${#saved_flags[@]} -gt 0 ]]; then
                     # Re-parse WITH saved flags, but the command structure is preserved
@@ -123,7 +128,55 @@ main() {
     # Step 4: Debug output if verbose
     debug_parsed_args
     
-    # Step 4a: Check if this command even needs Docker
+    # Step 4a: Handle installer run (skip Docker checks)
+    if [[ "${CLAUDECIRCLE_INSTALLER_RUN:-}" == "true" ]]; then
+        if [[ "${DEBUG_CI:-false}" == "true" ]]; then
+            echo "[DEBUG] Running in installer mode" >&2
+        fi
+        # Check if this is first install or update
+        if [[ -f "$HOME/.claudecircle/.installed" ]]; then
+            # Update - just show brief message
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Update path - showing update message" >&2; fi
+            logo_small
+            echo
+            cecho "ClaudeCircle updated successfully!" "$GREEN"
+            echo
+            echo "Run 'claudecircle' to start using ClaudeCircle."
+            echo
+        else
+            # First install - check if they have projects
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] First install path" >&2; fi
+            local project_count=0
+            if [[ -d "$HOME/.claudecircle/projects" ]]; then
+                project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            fi
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Project count: $project_count" >&2; fi
+            if [[ $project_count -eq 0 ]]; then
+                # Show full welcome
+                if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Showing first time welcome" >&2; fi
+                show_first_time_welcome
+            else
+                # Has projects but no .installed file
+                if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Has projects, showing install success" >&2; fi
+                logo_small
+                echo
+                cecho "ClaudeCircle installed successfully!" "$GREEN"
+                echo
+                echo "Run 'claudecircle' to start using ClaudeCircle."
+                echo
+            fi
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Creating .installed marker" >&2; fi
+            mkdir -p "$HOME/.claudecircle"
+            touch "$HOME/.claudecircle/.installed"
+            if [[ "${DEBUG_CI:-false}" == "true" ]]; then
+                echo "[DEBUG] Created .installed marker" >&2
+            fi
+        fi
+        if [[ "${DEBUG_CI:-false}" == "true" ]]; then echo "[DEBUG] Exiting installer mode with 0" >&2; fi
+        exit 0
+    fi
+
+    # Step 4b: Check if this command even needs Docker
     local cmd_requirements="none"
     if [[ -n "${CLI_SCRIPT_COMMAND}" ]]; then
         # Pass the first pass-through arg as potential subcommand
@@ -144,7 +197,7 @@ main() {
     # Step 5: Docker checks
     local docker_status
     docker_status=$(check_docker; echo $?)
-    case $docker_status in
+    case "$docker_status" in
         1) install_docker ;;
         2)
             warn "Docker is installed but not running."
@@ -170,12 +223,12 @@ main() {
     esac
     
     # Step 5a: Build core image if it doesn't exist
-    local core_image="claudebox-core"
+    local core_image="claudecircle-core"
     if ! docker image inspect "$core_image" >/dev/null 2>&1; then
         # Show logo during build
         logo
         
-        local build_context="$HOME/.claudebox/docker-build-context"
+        local build_context="$HOME/.claudecircle/docker-build-context"
         mkdir -p "$build_context"
         
         # Copy build files
@@ -189,18 +242,19 @@ main() {
         
         # Create core Dockerfile
         local core_dockerfile="$build_context/Dockerfile.core"
-        local base_dockerfile=$(cat "${root_dir}/build/Dockerfile") || error "Failed to read base Dockerfile"
+        local base_dockerfile
+        base_dockerfile=$(cat "${root_dir}/build/Dockerfile") || error "Failed to read base Dockerfile"
         
         # Remove profile installations and labels placeholders for core
         local core_dockerfile_content="$base_dockerfile"
         core_dockerfile_content="${core_dockerfile_content//\{\{PROFILE_INSTALLATIONS\}\}/}"
-        core_dockerfile_content="${core_dockerfile_content//\{\{LABELS\}\}/LABEL claudebox.type=\"core\"}"
+        core_dockerfile_content="${core_dockerfile_content//\{\{LABELS\}\}/LABEL claudecircle.type=\"core\"}"
         
         echo "$core_dockerfile_content" > "$core_dockerfile"
         
         # Build core image
         docker build \
-            --progress=${BUILDKIT_PROGRESS:-auto} \
+            --progress="${BUILDKIT_PROGRESS:-auto}" \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --build-arg USER_ID="$USER_ID" \
             --build-arg GROUP_ID="$GROUP_ID" \
@@ -211,7 +265,8 @@ main() {
             
             
         # Check if this is truly a first-time setup (no projects exist)
-        local project_count=$(ls -1d "$HOME/.claudebox/projects"/*/ 2>/dev/null | wc -l)
+        local project_count
+        project_count=$(find "$HOME/.claudecircle/projects" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
         
         if [[ $project_count -eq 0 ]]; then
             # First-time user - show welcome menu
@@ -225,36 +280,7 @@ main() {
         fi
     fi
     
-    # If running from installer, show appropriate message and exit
-    if [[ "${CLAUDEBOX_INSTALLER_RUN:-}" == "true" ]]; then
-        # Check if this is first install or update
-        if [[ -f "$HOME/.claudebox/.installed" ]]; then
-            # Update - just show brief message
-            logo_small
-            echo
-            cecho "ClaudeBox updated successfully!" "$GREEN"
-            echo
-            echo "Run 'claudebox' to start using ClaudeBox."
-            echo
-        else
-            # First install - check if they have projects
-            local project_count=$(ls -1d "$HOME/.claudebox/projects"/*/ 2>/dev/null | wc -l)
-            if [[ $project_count -eq 0 ]]; then
-                # Show full welcome
-                show_first_time_welcome
-            else
-                # Has projects but no .installed file
-                logo_small
-                echo
-                cecho "ClaudeBox installed successfully!" "$GREEN"
-                echo
-                echo "Run 'claudebox' to start using ClaudeBox."
-                echo
-            fi
-            touch "$HOME/.claudebox/.installed"
-        fi
-        exit 0
-    fi
+
     
     # Step 6: Initialize project directory (creates parent with profiles.ini)
     init_project_dir "$PROJECT_DIR"
@@ -266,7 +292,8 @@ main() {
     
     # Step 8: Always set up project variables
     # Get the actual parent folder name for the project
-    local parent_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
+    local parent_folder_name
+    parent_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
     
     # Get the slot to use (might be empty)
     project_folder_name=$(get_project_folder_name "$PROJECT_DIR")
@@ -289,14 +316,15 @@ main() {
     
     # Handle rebuild if requested
     if [[ "$rebuild_requested" == "true" ]]; then
-        warn "Forcing full rebuild of ClaudeBox Docker image..."
+        warn "Forcing full rebuild of ClaudeCircle Docker image..."
         rm -f "$PROJECT_PARENT_DIR/.docker_layer_checksums"
         docker rmi -f "$IMAGE_NAME" 2>/dev/null || true
     fi
     
     # Step 9: Run pre-flight validation for commands that need Docker
     if [[ -n "${CLI_SCRIPT_COMMAND}" ]]; then
-        local cmd_req=$(get_command_requirements "${CLI_SCRIPT_COMMAND}")
+        local cmd_req
+        cmd_req=$(get_command_requirements "${CLI_SCRIPT_COMMAND}")
         # Only run pre-flight for commands that need Docker or image
         if [[ "$cmd_req" == "docker" ]] || [[ "$cmd_req" == "image" ]]; then
             if ! preflight_check "${CLI_SCRIPT_COMMAND}" "${CLI_PASS_THROUGH[@]}"; then
@@ -318,8 +346,9 @@ main() {
         cmd_requirements="docker"
     fi
     
-    if [[ "$VERBOSE" == "true" ]]; then
+    if [[ "$VERBOSE" == "true" ]] || [[ "${DEBUG_CI:-false}" == "true" ]]; then
         echo "[DEBUG] Command requirements: $cmd_requirements" >&2
+        echo "[DEBUG] CLI_SCRIPT_COMMAND: $CLI_SCRIPT_COMMAND" >&2
     fi
     
     # Step 10a: Set IMAGE_NAME if needed (for "image" or "docker" requirements)
@@ -372,7 +401,8 @@ main() {
                     docker_profiles_hash=$(printf '%s\n' "${docker_profiles[@]}" | sort | cksum | cut -d' ' -f1)
                 fi
                 
-                local image_profiles_hash=$(docker inspect "$IMAGE_NAME" --format '{{index .Config.Labels "claudebox.profiles"}}' 2>/dev/null || echo "")
+                local image_profiles_hash
+                image_profiles_hash=$(docker inspect "$IMAGE_NAME" --format '{{index .Config.Labels "claudecircle.profiles"}}' 2>/dev/null || echo "")
                 
                 if [[ "$docker_profiles_hash" != "$image_profiles_hash" ]]; then
                     info "Docker-affecting profiles changed, rebuilding..."
@@ -384,7 +414,8 @@ main() {
         
         if [[ "$need_rebuild" == "true" ]]; then
             # Set rebuild timestamp to bust Docker cache when templates change
-            export CLAUDEBOX_REBUILD_TIMESTAMP=$(date +%s)
+            export CLAUDECIRCLE_REBUILD_TIMESTAMP
+            CLAUDECIRCLE_REBUILD_TIMESTAMP=$(date +%s)
             if [[ "$VERBOSE" == "true" ]]; then
                 echo "[DEBUG] About to build Docker image..." >&2
             fi
@@ -400,12 +431,12 @@ main() {
     setup_claude_agent_command
     
     # Step 12: Fix permissions if needed
-    if [[ ! -d "$HOME/.claudebox" ]]; then
-        mkdir -p "$HOME/.claudebox"
+    if [[ ! -d "$HOME/.claudecircle" ]]; then
+        mkdir -p "$HOME/.claudecircle"
     fi
-    if [[ ! -w "$HOME/.claudebox" ]]; then
-        warn "Fixing .claudebox permissions..."
-        sudo chown -R "$USER:$USER" "$HOME/.claudebox" || true
+    if [[ ! -w "$HOME/.claudecircle" ]]; then
+        warn "Fixing .claudecircle permissions..."
+        sudo chown -R "$USER:$USER" "$HOME/.claudecircle" || true
     fi
     
     # Step 13: Create allowlist if needed
@@ -432,9 +463,10 @@ main() {
         # No script command - running Claude interactively
         # This is where we load saved default flags
         if [[ -n "${PROJECT_SLOT_DIR:-}" ]]; then
-            local slot_name=$(basename "$PROJECT_SLOT_DIR")
+            local slot_name
+            slot_name=$(basename "$PROJECT_SLOT_DIR")
             # parent_folder_name already set in step 8
-            local container_name="claudebox-${parent_folder_name}-${slot_name}"
+            local container_name="claudecircle-${parent_folder_name}-${slot_name}"
             
             if [[ "$VERBOSE" == "true" ]]; then
                 echo "[DEBUG] PROJECT_SLOT_DIR=$PROJECT_SLOT_DIR" >&2
@@ -448,10 +480,10 @@ main() {
             
             # Load saved default flags ONLY for interactive Claude (no command)
             local saved_flags=()
-            if [[ -f "$HOME/.claudebox/default-flags" ]]; then
+            if [[ -f "$HOME/.claudecircle/default-flags" ]]; then
                 while IFS= read -r flag; do
                     [[ -n "$flag" ]] && saved_flags+=("$flag")
-                done < "$HOME/.claudebox/default-flags"
+                done < "$HOME/.claudecircle/default-flags"
                 
                 # Re-parse all arguments with saved flags included
                 if [[ ${#saved_flags[@]} -gt 0 ]]; then
@@ -495,9 +527,9 @@ main() {
                 fi
                 local piped_input
                 piped_input=$(cat)
-                run_claudebox_container "$container_name" "interactive" "${CLI_CONTROL_FLAGS[@]}" "-p" "$piped_input" "${CLI_PASS_THROUGH[@]}"
+                run_claudecircle_container "$container_name" "interactive" "${CLI_CONTROL_FLAGS[@]}" "-p" "$piped_input" "${CLI_PASS_THROUGH[@]}"
             else
-                run_claudebox_container "$container_name" "interactive" "${CLI_CONTROL_FLAGS[@]}" "${CLI_PASS_THROUGH[@]}"
+                run_claudecircle_container "$container_name" "interactive" "${CLI_CONTROL_FLAGS[@]}" "${CLI_PASS_THROUGH[@]}"
             fi
         else
             show_no_slots_menu
@@ -507,7 +539,7 @@ main() {
 
 # Helper function to build Docker image
 build_docker_image() {
-    local build_context="$HOME/.claudebox/docker-build-context"
+    local build_context="$HOME/.claudecircle/docker-build-context"
     mkdir -p "$build_context"
     
     # Copy build files to Docker build context
@@ -581,9 +613,9 @@ build_docker_image() {
     local project_folder_name
     project_folder_name=$(generate_parent_folder_name "$PROJECT_DIR")
     local labels="\
-LABEL claudebox.profiles=\"$profile_hash\"
-LABEL claudebox.profiles.crc=\"$profiles_file_hash\"
-LABEL claudebox.project=\"$project_folder_name\""
+LABEL claudecircle.profiles=\"$profile_hash\"
+LABEL claudecircle.profiles.crc=\"$profiles_file_hash\"
+LABEL claudecircle.project=\"$project_folder_name\""
     
     # Replace placeholders in the project template
     local final_dockerfile="$base_dockerfile"
@@ -600,7 +632,7 @@ LABEL claudebox.project=\"$project_folder_name\""
     ' <<<"$base_dockerfile") || error "Failed to apply Dockerfile substitutions"
 
     # Guard: ensure no unreplaced placeholders remain
-    if grep -q '{{PROFILE_INSTALLATIONS}}' <<<"$final_dockerfile" grep -q '{{LABELS}}' <<<"$final_dockerfile"; then
+    if grep -q '{{PROFILE_INSTALLATIONS}}' <<<"$final_dockerfile" || grep -q '{{LABELS}}' <<<"$final_dockerfile"; then
     error "Unreplaced placeholders remain in generated Dockerfile"
     fi
 

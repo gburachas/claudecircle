@@ -59,9 +59,9 @@ generate_parent_folder_name() {
     printf '%s_%08x' "$slug" "$base_crc"
 }
 
-# Compute parent project directory: ~/.claudebox/projects/<slug>_<crc-of-index-0>
+# Compute parent project directory: ~/.claudecircle/projects/<slug>_<crc-of-index-0>
 get_parent_dir() {
-    echo "$HOME/.claudebox/projects/$(generate_parent_folder_name "$1")"
+    echo "$HOME/.claudecircle/projects/$(generate_parent_folder_name "$1")"
 }
 
 
@@ -84,7 +84,7 @@ init_project_dir() {
     # Copy common.sh to project parent directory if it doesn't exist
     local common_sh_target="$parent/common.sh"
     if [[ ! -f "$common_sh_target" ]]; then
-        local common_sh_source="${CLAUDEBOX_SCRIPT_DIR:-${SCRIPT_DIR}}/lib/common.sh"
+        local common_sh_source="${CLAUDECIRCLE_SCRIPT_DIR:-${SCRIPT_DIR}}/lib/common.sh"
         if [[ -f "$common_sh_source" ]]; then
             cp "$common_sh_source" "$common_sh_target"
         fi
@@ -110,8 +110,8 @@ init_slot_dir() {
     local dir="$1"
     mkdir -p "$dir"
     
-    # Check if claude/ directory exists in the claudebox root to seed .claude
-    local claude_source="${CLAUDEBOX_SCRIPT_DIR:-${SCRIPT_DIR}}/claude"
+    # Check if claude/ directory exists in the claudecircle root to seed .claude
+    local claude_source="${CLAUDECIRCLE_SCRIPT_DIR:-${SCRIPT_DIR}}/claude"
     if [[ -d "$claude_source" ]]; then
         # Copy the claude folder to .claude to seed it
         cp -r "$claude_source" "$dir/.claude"
@@ -181,6 +181,7 @@ determine_next_start_container() {
     local path="$1" parent max idx name dir
     parent=$(get_parent_dir "$path")
     max=$(read_counter "$parent")
+    # echo "DEBUG: determine_next_start_container path=$path parent=$parent max=$max" >&2
     for ((idx=1; idx<=max; idx++)); do
         name=$(generate_container_name "$path" "$idx")
         dir="$parent/$name"
@@ -188,7 +189,7 @@ determine_next_start_container() {
         [ -d "$dir" ] || continue
         
         # Check if a container with this slot name is running
-        if ! docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+        if ! docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
             echo "$name"
             return 0
         fi
@@ -213,7 +214,7 @@ find_ready_slot() {
         [ -f "$dir/.claude/.credentials.json" ] || continue
         
         # Check if not running (inactive)
-        if ! docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+        if ! docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
             echo "$name"
             return 0
         fi
@@ -237,7 +238,7 @@ find_inactive_slot() {
         [ -d "$dir" ] || continue
         
         # Check if not running (inactive)
-        if ! docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+        if ! docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
             echo "$name"
             return 0
         fi
@@ -269,8 +270,9 @@ get_project_folder_name() {
 
 # Get Docker image name for a specific slot
 get_image_name() {
-    local parent_folder_name=$(generate_parent_folder_name "${PROJECT_DIR}")
-    printf 'claudebox-%s' "${parent_folder_name}"
+    local parent_folder_name
+    parent_folder_name=$(generate_parent_folder_name "${PROJECT_DIR}")
+    printf 'claudecircle-%s' "${parent_folder_name}"
 }
 
 # For backwards compatibility
@@ -281,10 +283,11 @@ _get_project_slug() {
 # Get project by path - now checks parent directories
 get_project_by_path() {
     local search_path="$1"
-    local abs_path=$(realpath "$search_path" 2>/dev/null || echo "$search_path")
+    local abs_path
+    abs_path=$(realpath "$search_path" 2>/dev/null || echo "$search_path")
     
-    # Check all parent directories in ~/.claudebox/projects/
-    for parent_dir in "$HOME/.claudebox/projects"/*/ ; do
+    # Check all parent directories in ~/.claudecircle/projects/
+    for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
         [[ -d "$parent_dir" ]] || continue
         
         # Check if profiles.ini exists (indicates valid project)
@@ -303,11 +306,12 @@ list_all_projects() {
     local projects_found=0
     
     # Iterate through parent directories
-    for parent_dir in "$HOME/.claudebox/projects"/*/ ; do
+    for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
         [[ -d "$parent_dir" ]] || continue
         projects_found=1
         
-        local parent_name=$(basename "$parent_dir")
+        local parent_name
+        parent_name=$(basename "$parent_dir")
         local profiles_file="$parent_dir/profiles.ini"
         local slot_count=0
         local active_slots=0
@@ -324,7 +328,7 @@ list_all_projects() {
         done
         
         # Check if Docker image exists
-        local image_name="claudebox-${parent_name}"
+        local image_name="claudecircle-${parent_name}"
         local image_status="❌"
         local image_size="-"
         
@@ -351,7 +355,8 @@ resolve_project_path() {
     fi
     
     # Otherwise, get the parent directory for this path
-    local parent_name=$(get_project_folder_name "$input_path")
+    local parent_name
+    parent_name=$(get_project_folder_name "$input_path")
     echo "$parent_name"
     return 0
 }
@@ -363,13 +368,16 @@ resolve_project_path() {
 # Auto-prune counter to remove trailing missing slots
 prune_slot_counter() {
     local path="$1"
-    local parent=$(get_parent_dir "$path")
-    local max=$(read_counter "$parent")
+    local parent
+    parent=$(get_parent_dir "$path")
+    local max
+    max=$(read_counter "$parent")
     
     # Find highest existing slot
     local highest=0
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         local dir="$parent/$name"
         if [ -d "$dir" ]; then
             highest=$idx
@@ -387,7 +395,8 @@ prune_slot_counter() {
 # List all slots for current project
 list_project_slots() {
     local path="${1:-$PWD}"
-    local parent=$(get_parent_dir "$path")
+    local parent
+    parent=$(get_parent_dir "$path")
     
     if [ ! -d "$parent" ]; then
         echo "No project found for path: $path"
@@ -396,14 +405,15 @@ list_project_slots() {
     
     # Prune counter first
     prune_slot_counter "$path"
-    local max=$(read_counter "$parent")
+    local max
+    max=$(read_counter "$parent")
     
     logo_small
     echo
     
     if [ $max -eq 0 ]; then
         echo "Commands:"
-        printf "  %-20s %s\n" "claudebox create" "Create new slot"
+        printf "  %-20s %s\n" "claudecircle create" "Create new slot"
         echo
         echo "  Hint: Make sure you are in"
         echo "  a project root folder."
@@ -415,10 +425,10 @@ list_project_slots() {
     
     echo "Commands:"
     echo
-    printf "  %-20s %s\n" "claudebox create" "Create new slot"
-    printf "  %-20s %s\n" "claudebox slot <n>" "Launch specific slot"
-    printf "  %-20s %s\n" "claudebox revoke" "Remove highest slot"
-    printf "  %-20s %s\n" "claudebox revoke all" "Remove all unused slots"
+    printf "  %-20s %s\n" "claudecircle create" "Create new slot"
+    printf "  %-20s %s\n" "claudecircle slot <n>" "Launch specific slot"
+    printf "  %-20s %s\n" "claudecircle revoke" "Remove highest slot"
+    printf "  %-20s %s\n" "claudecircle revoke all" "Remove all unused slots"
     echo
     
     echo "Slots for $path:"
@@ -429,7 +439,8 @@ list_project_slots() {
     printf "  ────   ─────────────────     ─────────  ────────\n"
     
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         local dir="$parent/$name"
         local auth_icon="💀"
         local auth_text="Removed"
@@ -447,7 +458,7 @@ list_project_slots() {
             fi
             
             # Check if a container with this slot name is running
-            if docker ps --format "{{.Names}}" | grep -q "^claudebox-.*-${name}$"; then
+            if docker ps --format "{{.Names}}" | grep -q "^claudecircle-.*-${name}$"; then
                 run_icon="🟢"
                 run_text="Active"
             else
@@ -469,8 +480,10 @@ list_project_slots() {
 get_slot_dir() {
     local path="$1"
     local idx="${2:-0}"
-    local parent=$(get_parent_dir "$path")
-    local name=$(generate_container_name "$path" "$idx")
+    local parent
+    parent=$(get_parent_dir "$path")
+    local name
+    name=$(generate_container_name "$path" "$idx")
     echo "$parent/$name"
 }
 
@@ -478,11 +491,14 @@ get_slot_dir() {
 get_slot_index() {
     local slot_name="$1"
     local parent_dir="$2"
-    local path=$(dirname "$parent_dir")  # Get original path from parent
-    local max=$(read_counter "$parent_dir")
+    local path
+    path=$(dirname "$parent_dir")  # Get original path from parent
+    local max
+    max=$(read_counter "$parent_dir")
     
     for ((idx=1; idx<=max; idx++)); do
-        local name=$(generate_container_name "$path" "$idx")
+        local name
+        name=$(generate_container_name "$path" "$idx")
         if [[ "$name" == "$slot_name" ]]; then
             echo "$idx"
             return 0
@@ -496,24 +512,24 @@ get_slot_index() {
 sync_commands_to_project() {
     local project_parent="$1"
     local commands_dir="$project_parent/commands"
-    local cbox_checksum_file="$project_parent/.commands_cbox_checksum"
+    local ccircle_checksum_file="$project_parent/.commands_ccircle_checksum"
     local user_checksum_file="$project_parent/.commands_user_checksum"
     
     # Source directories
-    local cbox_source="${CLAUDEBOX_SCRIPT_DIR:-${SCRIPT_DIR}}/commands"
+    local ccircle_source="${CLAUDECIRCLE_SCRIPT_DIR:-${SCRIPT_DIR}}/commands"
     local user_source="$HOME/.claude/commands"
     
     # Create commands directory if it doesn't exist
     mkdir -p "$commands_dir"
     
     # Calculate checksums of source directories
-    local cbox_checksum=""
+    local ccircle_checksum=""
     local user_checksum=""
     
-    # Get checksum of cbox commands if directory exists
-    if [[ -d "$cbox_source" ]]; then
+    # Get checksum of ccircle commands if directory exists
+    if [[ -d "$ccircle_source" ]]; then
         # Find all files, get their content checksum, sort for consistency
-        cbox_checksum=$(find "$cbox_source" -type f -exec sha256sum {} \; 2>/dev/null | sort | sha256sum | cut -d' ' -f1)
+        ccircle_checksum=$(find "$ccircle_source" -type f -exec sha256sum {} \; 2>/dev/null | sort | sha256sum | cut -d' ' -f1)
     fi
     
     # Get checksum of user commands if directory exists
@@ -521,15 +537,16 @@ sync_commands_to_project() {
         user_checksum=$(find "$user_source" -type f -exec sha256sum {} \; 2>/dev/null | sort | sha256sum | cut -d' ' -f1)
     fi
     
-    # Check if cbox commands need syncing
-    local sync_cbox=false
-    if [[ -d "$cbox_source" ]]; then
-        if [[ ! -f "$cbox_checksum_file" ]]; then
-            sync_cbox=true
+    # Check if ccircle commands need syncing
+    local sync_ccircle=false
+    if [[ -d "$ccircle_source" ]]; then
+        if [[ ! -f "$ccircle_checksum_file" ]]; then
+            sync_ccircle=true
         else
-            local stored_cbox=$(cat "$cbox_checksum_file" 2>/dev/null || echo "")
-            if [[ "$cbox_checksum" != "$stored_cbox" ]]; then
-                sync_cbox=true
+            local stored_ccircle
+            stored_ccircle=$(cat "$ccircle_checksum_file" 2>/dev/null || echo "")
+            if [[ "$ccircle_checksum" != "$stored_ccircle" ]]; then
+                sync_ccircle=true
             fi
         fi
     fi
@@ -540,36 +557,38 @@ sync_commands_to_project() {
         if [[ ! -f "$user_checksum_file" ]]; then
             sync_user=true
         else
-            local stored_user=$(cat "$user_checksum_file" 2>/dev/null || echo "")
+            local stored_user
+            stored_user=$(cat "$user_checksum_file" 2>/dev/null || echo "")
             if [[ "$user_checksum" != "$stored_user" ]]; then
                 sync_user=true
             fi
         fi
     fi
     
-    # Sync cbox commands
-    if [[ "$sync_cbox" == "true" ]] && [[ -d "$cbox_source" ]]; then
+    # Sync ccircle commands
+    if [[ "$sync_ccircle" == "true" ]] && [[ -d "$ccircle_source" ]]; then
         if [[ "$VERBOSE" == "true" ]]; then
-            echo "[DEBUG] Syncing cbox commands to $commands_dir/cbox" >&2
+            echo "[DEBUG] Syncing ccircle commands to $commands_dir/ccircle" >&2
         fi
         
-        # Remove old cbox commands and recreate
-        rm -rf "$commands_dir/cbox"
-        mkdir -p "$commands_dir/cbox"
+        # Remove old ccircle commands and recreate
+        rm -rf "$commands_dir/ccircle"
+        mkdir -p "$commands_dir/ccircle"
         
         # Copy preserving directory structure
         # Use find to handle subdirectories properly
-        if cd "$cbox_source"; then
+        if cd "$ccircle_source"; then
             find . -type f | while read -r file; do
-                local dir=$(dirname "$file")
-                mkdir -p "$commands_dir/cbox/$dir"
-                cp "$file" "$commands_dir/cbox/$file"
+                local dir
+                dir=$(dirname "$file")
+                mkdir -p "$commands_dir/ccircle/$dir"
+                cp "$file" "$commands_dir/ccircle/$file"
             done
             cd - >/dev/null || true
         fi
         
         # Save checksum
-        echo "$cbox_checksum" > "$cbox_checksum_file"
+        echo "$ccircle_checksum" > "$ccircle_checksum_file"
     fi
     
     # Sync user commands
@@ -585,7 +604,8 @@ sync_commands_to_project() {
         # Copy preserving directory structure
         if cd "$user_source"; then
             find . -type f | while read -r file; do
-                local dir=$(dirname "$file")
+                local dir
+                dir=$(dirname "$file")
                 mkdir -p "$commands_dir/user/$dir"
                 cp "$file" "$commands_dir/user/$file"
             done
@@ -597,9 +617,9 @@ sync_commands_to_project() {
     fi
     
     # Clean up empty directories if sources don't exist
-    if [[ ! -d "$cbox_source" ]] && [[ -d "$commands_dir/cbox" ]]; then
-        rm -rf "$commands_dir/cbox"
-        rm -f "$cbox_checksum_file"
+    if [[ ! -d "$ccircle_source" ]] && [[ -d "$commands_dir/ccircle" ]]; then
+        rm -rf "$commands_dir/ccircle"
+        rm -f "$ccircle_checksum_file"
     fi
     
     if [[ ! -d "$user_source" ]] && [[ -d "$commands_dir/user" ]]; then

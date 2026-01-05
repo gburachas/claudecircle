@@ -62,12 +62,13 @@ get_profile_description() {
         datascience) echo "Data Science (Python, Jupyter, R)" ;;
         security) echo "Security Tools (scanners, crackers, packet tools)" ;;
         ml) echo "Machine Learning (build layer only; Python via uv)" ;;
+        agent) echo "Claude Agent SDK (Python & TypeScript SDKs)" ;;
         *) echo "" ;;
     esac
 }
 
 get_all_profile_names() {
-    echo "core build-tools shell networking c openwrt rust python go flutter javascript java ruby php database devops web embedded datascience security ml"
+    echo "core build-tools shell networking c openwrt rust python go flutter javascript java ruby php database devops web embedded datascience security ml agent"
 }
 
 profile_exists() {
@@ -99,7 +100,7 @@ expand_profile() {
 get_profile_file_path() {
     # Use the parent directory name, not the slot name
     local parent_name=$(generate_parent_folder_name "$PROJECT_DIR")
-    local parent_dir="$HOME/.claudebox/projects/$parent_name"
+    local parent_dir="$HOME/.claudecircle/projects/$parent_name"
     mkdir -p "$parent_dir"
     echo "$parent_dir/profiles.ini"
 }
@@ -140,7 +141,10 @@ update_profile_section() {
     local new_items=("$@")
 
     local existing_items=()
-    readarray -t existing_items < <(read_profile_section "$profile_file" "$section")
+    local existing_items=()
+    while IFS= read -r line; do
+        existing_items+=("$line")
+    done < <(read_profile_section "$profile_file" "$section")
 
     local all_items=()
     for item in "${existing_items[@]}"; do
@@ -177,7 +181,7 @@ update_profile_section() {
 }
 
 get_current_profiles() {
-    local profiles_file="${PROJECT_PARENT_DIR:-$HOME/.claudebox/projects/$(generate_parent_folder_name "$PWD")}/profiles.ini"
+    local profiles_file="${PROJECT_PARENT_DIR:-$HOME/.claudecircle/projects/$(generate_parent_folder_name "$PWD")}/profiles.ini"
     local current_profiles=()
     
     if [[ -f "$profiles_file" ]]; then
@@ -365,9 +369,18 @@ get_profile_ml() {
     echo "# ML profile uses build-tools for compilation"
 }
 
+get_profile_agent() {
+    cat << 'EOF'
+USER claude
+RUN bash -c "source $HOME/.nvm/nvm.sh && npm install -g @anthropic-ai/claude-agent-sdk"
+RUN ~/.local/bin/uv python install
+USER root
+EOF
+}
+
 export -f _read_ini get_profile_packages get_profile_description get_all_profile_names profile_exists expand_profile
 export -f get_profile_file_path read_config_value read_profile_section update_profile_section get_current_profiles
 export -f get_profile_core get_profile_build_tools get_profile_shell get_profile_networking get_profile_c get_profile_openwrt
 export -f get_profile_rust get_profile_python get_profile_go get_profile_flutter get_profile_javascript get_profile_java get_profile_ruby
 export -f get_profile_php get_profile_database get_profile_devops get_profile_web get_profile_embedded get_profile_datascience
-export -f get_profile_security get_profile_ml
+export -f get_profile_security get_profile_ml get_profile_agent

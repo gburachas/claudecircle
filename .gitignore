@@ -70,5 +70,5 @@ test-project/
 backlog/
 
 # Generated installer
-claudebox.run.sh
-claudebox.run
+claudecircle.run.sh
+claudecircle.run

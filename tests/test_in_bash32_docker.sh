@@ -1,9 +1,9 @@
 #!/bin/bash
-# Run ClaudeBox compatibility tests in actual Bash 3.2 using Docker
+# Run ClaudeCircle compatibility tests in actual Bash 3.2 using Docker
 # Usage: ./test_in_bash32_docker.sh
 
 echo "=========================================="
-echo "Testing ClaudeBox in real Bash 3.2 Docker"
+echo "Testing ClaudeCircle in real Bash 3.2 Docker"
 echo "=========================================="
 
 # Check if Docker is available

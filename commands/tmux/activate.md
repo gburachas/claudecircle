@@ -2,8 +2,8 @@
 
 **Mode:**
 Parse the command arguments to extract your pane ID. Arguments may be passed as:
-- Single argument: `/cbox:tmux:activate %12` (pane ID is `%12`)
-- Named arguments: `/cbox:tmux:activate ID=%12 FOO=bar` (extract ID value)
+- Single argument: `/ccircle:tmux:activate %12` (pane ID is `%12`)
+- Named arguments: `/ccircle:tmux:activate ID=%12 FOO=bar` (extract ID value)
 
 Once you read, agree to comply with and understand the info below, Respond with ascii logo then beneath that print: "Claude Code Agent [YOUR-PANE-ID] standing by."
 
@@ -92,7 +92,7 @@ Terminal Mux Mode
 
 Upon activation, consider these startup tasks:
 
-1. **Initialize distributed documentation**: Run `/cbox:init-docs` to ensure all subdirectories have CLAUDE.md files
+1. **Initialize distributed documentation**: Run `/ccircle:init-docs` to ensure all subdirectories have CLAUDE.md files
 2. **Review existing CLAUDE.md files** in your working area to understand the codebase structure
 3. **Update documentation** as you discover critical knowledge during your work
 

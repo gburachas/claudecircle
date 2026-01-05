@@ -37,7 +37,7 @@ preflight_check() {
                 if [[ -n "$slot_num" ]]; then
                     local slot_dir=$(get_slot_dir "$PROJECT_DIR" "$slot_num" 2>/dev/null || echo "")
                     if [[ -z "$slot_dir" ]] || [[ ! -d "$slot_dir" ]]; then
-                        error "Slot $slot_num does not exist. Run 'claudebox slots' to see available slots."
+                        error "Slot $slot_num does not exist. Run 'claudecircle slots' to see available slots."
                         return 1
                     fi
                 fi
@@ -78,7 +78,7 @@ Please cd to a project directory first."
                 local search_lower=$(echo "$search" | tr '[:upper:]' '[:lower:]')
                 local found=false
                 
-                for parent_dir in "$HOME/.claudebox/projects"/*/ ; do
+                for parent_dir in "$HOME/.claudecircle/projects"/*/ ; do
                     [[ -d "$parent_dir" ]] || continue
                     local dir_name=$(basename "$parent_dir")
                     local dir_lower=$(echo "$dir_name" | tr '[:upper:]' '[:lower:]')

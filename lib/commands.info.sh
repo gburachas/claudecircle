@@ -5,18 +5,18 @@
 # Shows system, project, and configuration information
 
 _cmd_projects() {
-    cecho "ClaudeBox Projects:" "$CYAN"
+    cecho "ClaudeCircle Projects:" "$CYAN"
     echo
     printf "%10s  %s  %s\n" "Size" "🐳" "Path"
     printf "%10s  %s  %s\n" "----" "--" "----"
 
     if ! list_all_projects; then
         echo
-        warn "No ClaudeBox projects found."
+        warn "No ClaudeCircle projects found."
         echo
         cecho "Start a new project:" "$GREEN"
         echo "  cd /your/project/directory"
-        echo "  claudebox"
+        echo "  claudecircle"
     fi
     echo
     exit 0
@@ -26,7 +26,7 @@ _cmd_allowlist() {
     # Allowlist is stored in parent directory, not slot directory
     local allowlist_file="$PROJECT_PARENT_DIR/allowlist"
 
-    cecho "🔒 ClaudeBox Firewall Allowlist" "$CYAN"
+    cecho "🔒 ClaudeCircle Firewall Allowlist" "$CYAN"
     echo
     cecho "Current Project: $PROJECT_DIR" "$WHITE"
     echo
@@ -67,11 +67,11 @@ _cmd_info() {
     # Compute project folder name early for paths
     local project_folder_name
     project_folder_name=$(get_project_folder_name "$PROJECT_DIR")
-    IMAGE_NAME="claudebox-${project_folder_name}"
-    PROJECT_SLOT_DIR="$HOME/.claudebox/projects/$project_folder_name"
+    IMAGE_NAME="claudecircle-${project_folder_name}"
+    PROJECT_SLOT_DIR="$HOME/.claudecircle/projects/$project_folder_name"
 
     cecho "╔═══════════════════════════════════════════════════════════════════╗" "$CYAN"
-    cecho "║                    ClaudeBox Information Panel                    ║" "$CYAN"
+    cecho "║                    ClaudeCircle Information Panel                 ║" "$CYAN"
     cecho "╚═══════════════════════════════════════════════════════════════════╝" "$CYAN"
     echo
 
@@ -82,19 +82,19 @@ _cmd_info() {
     echo "   Data Dir:   $PROJECT_SLOT_DIR"
     echo
 
-    # ClaudeBox Installation
-    cecho "📦 ClaudeBox Installation" "$WHITE"
+    # ClaudeCircle Installation
+    cecho "📦 ClaudeCircle Installation" "$WHITE"
     echo "   Script:  $SCRIPT_PATH"
     echo "   Symlink: $LINK_TARGET"
     echo
 
     # Saved CLI Flags
     cecho "🚀 Saved CLI Flags" "$WHITE"
-    if [[ -f "$HOME/.claudebox/default-flags" ]]; then
+    if [[ -f "$HOME/.claudecircle/default-flags" ]]; then
         local saved_flags=()
         while IFS= read -r flag; do
             [[ -n "$flag" ]] && saved_flags+=("$flag")
-        done < "$HOME/.claudebox/default-flags"
+        done < "$HOME/.claudecircle/default-flags"
         if [[ ${#saved_flags[@]} -gt 0 ]]; then
             echo -e "   Flags: ${GREEN}${saved_flags[*]}${NC}"
         else
@@ -166,7 +166,7 @@ _cmd_info() {
 
     echo -e "   Available:  ${CYAN}core${NC}, python, c, rust, go, flutter, javascript, java, ruby, php"
     echo -e "               database, devops, web, ml, security, embedded, networking"
-    echo -e "   ${CYAN}Hint:${NC} Run 'claudebox profile' for profile help "
+    echo -e "   ${CYAN}Hint:${NC} Run 'claudecircle profile' for profile help "
     echo
 
     cecho "🐳 Docker Status" "$WHITE"
@@ -200,10 +200,10 @@ _cmd_info() {
 
     # All Projects Summary
     cecho "📊 All Projects Summary" "$WHITE"
-    local total_projects=$(ls -1d "$HOME/.claudebox/projects"/*/ 2>/dev/null | wc -l)
+    local total_projects=$(ls -1d "$HOME/.claudecircle/projects"/*/ 2>/dev/null | wc -l)
     echo "   Projects:   $total_projects total"
 
-    local total_size=$(docker images --filter "reference=claudebox-*" --format "{{.Size}}" | awk '{
+    local total_size=$(docker images --filter "reference=claudecircle-*" --format "{{.Size}}" | awk '{
         size=$1; unit=$2;
         if (unit == "GB") size = size * 1024;
         else if (unit == "KB") size = size / 1024;
@@ -212,8 +212,8 @@ _cmd_info() {
         if (total > 1024) printf "%.1fGB", total/1024;
         else printf "%.1fMB", total
     }')
-    local image_count=$(docker images --filter "reference=claudebox-*" -q | wc -l)
-    echo "   Images:     $image_count ClaudeBox images using $total_size"
+    local image_count=$(docker images --filter "reference=claudecircle-*" -q | wc -l)
+    echo "   Images:     $image_count ClaudeCircle images using $total_size"
 
     local docker_stats=$(docker system df --format "table {{.Type}}\t{{.Total}}\t{{.Active}}\t{{.Size}}\t{{.Reclaimable}}" 2>/dev/null | tail -n +2)
     if [[ -n "$docker_stats" ]]; then

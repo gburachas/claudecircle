@@ -2,7 +2,7 @@
 
 **Purpose:** Create or update CLAUDE.md files in project subdirectories to establish distributed documentation for better context management.
 
-**Usage:** `/cbox:init-docs [directory]`
+**Usage:** `/ccircle:init-docs [directory]`
 
 When invoked, you should:
 
@@ -56,7 +56,7 @@ Brief description of what this directory/module is responsible for.
 ## Example Workflow
 
 When starting work in tmux mode:
-1. Run `/cbox:init-docs` to scan and create missing CLAUDE.md files
+1. Run `/ccircle:init-docs` to scan and create missing CLAUDE.md files
 2. Review existing CLAUDE.md files in your working directories
 3. Update them as you learn critical information
 4. This distributed approach keeps context usage efficient

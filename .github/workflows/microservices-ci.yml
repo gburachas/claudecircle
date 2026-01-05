@@ -15,7 +15,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}/claudebox
+  IMAGE_PREFIX: ${{ github.repository_owner }}/claudecircle
 
 jobs:
   detect-changes:
@@ -136,7 +136,7 @@ jobs:
           sleep 30  # Wait for services to start
           docker compose -f docker-compose.test.yml run integration-tests
         env:
-          COMPOSE_PROJECT_NAME: claudebox-test
+          COMPOSE_PROJECT_NAME: claudecircle-test
 
       - name: Cleanup
         if: always()

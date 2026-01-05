@@ -21,7 +21,7 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 DEFAULT_DOMAINS="api.anthropic.com console.anthropic.com statsig.anthropic.com sentry.io"
 
 ALLOWED_DOMAINS="$DEFAULT_DOMAINS"
-ALLOWLIST_FILE="/home/DOCKERUSER/.claudebox/allowlist"
+ALLOWLIST_FILE="/home/DOCKERUSER/.claudecircle/allowlist"
 if [ -f "$ALLOWLIST_FILE" ]; then
     while IFS= read -r line; do
         [[ "$line" =~ ^#.* ]] && continue

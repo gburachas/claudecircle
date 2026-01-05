@@ -3,7 +3,7 @@
 # Run this with: bash test_bash32_compat.sh
 
 echo "======================================"
-echo "ClaudeBox Bash 3.2 Compatibility Test"
+echo "ClaudeCircle Bash 3.2 Compatibility Test"
 echo "======================================"
 echo "Current Bash version: $BASH_VERSION"
 echo
@@ -77,7 +77,7 @@ test_get_all_names() {
     eval "$PROFILE_FUNCS"
     local result=$(get_all_profile_names)
     local count=$(echo "$result" | wc -w)
-    [[ $count -eq 20 ]]
+    [[ $count -eq 22 ]]
 }
 run_test "get_all_profile_names()" test_get_all_names
 

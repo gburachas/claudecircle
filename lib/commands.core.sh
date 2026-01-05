@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Core Commands - Essential ClaudeBox operations
+# Core Commands - Essential ClaudeCircle operations
 # ============================================================================
 # Commands: help, shell, update
 # These are the fundamental commands that users interact with most
@@ -32,7 +32,7 @@ _cmd_help() {
                 # In project directory with image - show Claude help
                 show_claude_help
             else
-                # Not in project directory - show ClaudeBox help
+                # Not in project directory - show ClaudeCircle help
                 show_help
             fi
             ;;
@@ -66,7 +66,7 @@ _cmd_shell() {
     
     # Check if image exists
     if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-        error "No Docker image found for this project.\nRun 'claudebox' first to build the image."
+        error "No Docker image found for this project.\nRun 'claudecircle' first to build the image."
     fi
     
     local persist_mode=false
@@ -103,7 +103,7 @@ _cmd_shell() {
         echo
         
         # Create a named container for admin mode so we can commit it
-        local temp_container="claudebox-admin-$$"
+        local temp_container="claudecircle-admin-$$"
         
         # Ensure cleanup runs on any exit (including Ctrl-C)
         cleanup_admin() {
@@ -117,7 +117,7 @@ _cmd_shell() {
             echo "[DEBUG] Remaining args after processing: $*" >&2
         fi
         # Don't pass any remaining arguments - only shell and the flags
-        run_claudebox_container "$temp_container" "interactive" shell "${shell_flags[@]}"
+        run_claudecircle_container "$temp_container" "interactive" shell "${shell_flags[@]}"
         
         # Commit changes back to image
         fillbar
@@ -127,7 +127,7 @@ _cmd_shell() {
         success "Changes saved to image!"
     else
         # Regular shell mode - just run without committing
-        run_claudebox_container "" "interactive" shell "${shell_flags[@]}"
+        run_claudecircle_container "" "interactive" shell "${shell_flags[@]}"
     fi
     
     exit 0
@@ -139,19 +139,19 @@ _cmd_update() {
         info "Updating all components..."
         echo
         
-        # Update claudebox script
-        info "Updating claudebox script..."
+        # Update claudecircle script
+        info "Updating claudecircle script..."
         if command -v curl >/dev/null 2>&1; then
-            curl -fsSL https://raw.githubusercontent.com/RchGrav/claudebox/main/claudebox -o /tmp/claudebox.new
+            curl -fsSL https://raw.githubusercontent.com/RchGrav/claudecircle/main/claudecircle -o /tmp/claudecircle.new
         elif command -v wget >/dev/null 2>&1; then
-            wget -qO /tmp/claudebox.new https://raw.githubusercontent.com/RchGrav/claudebox/main/claudebox
+            wget -qO /tmp/claudecircle.new https://raw.githubusercontent.com/RchGrav/claudecircle/main/claudecircle
         else
             error "Neither curl nor wget found"
         fi
         
-        if [[ -f /tmp/claudebox.new ]]; then
-            # Find the installed claudebox (not the source)
-            local installed_path=$(which claudebox 2>/dev/null || echo "/usr/local/bin/claudebox")
+        if [[ -f /tmp/claudecircle.new ]]; then
+            # Find the installed claudecircle (not the source)
+            local installed_path=$(which claudecircle 2>/dev/null || echo "/usr/local/bin/claudecircle")
             
             # If it's a symlink, replace it with the actual file first
             if [[ -L "$installed_path" ]]; then
@@ -170,13 +170,13 @@ _cmd_update() {
             
             # Compare hashes of the INSTALLED file
             current_hash=$(crc32_file "$installed_path" || echo "none")
-            new_hash=$(crc32_file /tmp/claudebox.new)
+            new_hash=$(crc32_file /tmp/claudecircle.new)
             
             if [[ "$current_hash" != "$new_hash" ]]; then
                 info "New version available, updating..."
                 
                 # Backup current installed version
-                local backups_dir="$HOME/.claudebox/backups"
+                local backups_dir="$HOME/.claudecircle/backups"
                 mkdir -p "$backups_dir"
                 local timestamp=$(date +%s)
                 cp "$installed_path" "$backups_dir/$timestamp"
@@ -184,31 +184,31 @@ _cmd_update() {
                 
                 # Update the INSTALLED file
                 if [[ -w "$installed_path" ]] || [[ -w "$(dirname "$installed_path")" ]]; then
-                    cp /tmp/claudebox.new "$installed_path"
+                    cp /tmp/claudecircle.new "$installed_path"
                     chmod +x "$installed_path"
                 else
-                    sudo cp /tmp/claudebox.new "$installed_path"
+                    sudo cp /tmp/claudecircle.new "$installed_path"
                     sudo chmod +x "$installed_path"
                 fi
-                success "✓ Claudebox script updated at $installed_path"
+                success "✓ Claudecircle script updated at $installed_path"
             else
-                success "✓ Claudebox script already up to date"
+                success "✓ Claudecircle script already up to date"
             fi
-            rm -f /tmp/claudebox.new
+            rm -f /tmp/claudecircle.new
         fi
         echo
         
         # Update commands
         info "Updating commands..."
-        local commands_dir="$HOME/.claudebox/commands"
+        local commands_dir="$HOME/.claudecircle/commands"
         mkdir -p "$commands_dir"
         
         for cmd in taskengine devops; do
             echo -n "  Updating $cmd.md... "
             if command -v curl >/dev/null 2>&1; then
-                curl -fsSL "https://raw.githubusercontent.com/RchGrav/claudebox/main/commands/$cmd.md" -o "$commands_dir/$cmd.md"
+                curl -fsSL "https://raw.githubusercontent.com/RchGrav/claudecircle/main/commands/$cmd.md" -o "$commands_dir/$cmd.md"
             else
-                wget -qO "$commands_dir/$cmd.md" "https://raw.githubusercontent.com/RchGrav/claudebox/main/commands/$cmd.md"
+                wget -qO "$commands_dir/$cmd.md" "https://raw.githubusercontent.com/RchGrav/claudecircle/main/commands/$cmd.md"
             fi
             echo "✓"
         done
@@ -223,7 +223,7 @@ _cmd_update() {
     
     # Check if image exists first
     if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-        error "No Docker image found for this project folder: $PROJECT_DIR\nRun 'claudebox' first to build the image, or cd to your project directory."
+        error "No Docker image found for this project folder: $PROJECT_DIR\nRun 'claudecircle' first to build the image, or cd to your project directory."
     fi
     
     # Continue with normal update flow

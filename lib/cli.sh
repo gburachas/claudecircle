@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Unified CLI parser for ClaudeBox
+# Unified CLI parser for ClaudeCircle
 # Implements the four-bucket architecture for clean, predictable CLI handling
 
 # ============================================================================
@@ -7,16 +7,17 @@
 # ============================================================================
 
 # Four flag buckets (Bash 3.2 compatible - no associative arrays)
-readonly HOST_ONLY_FLAGS=(--verbose rebuild)
-readonly CONTROL_FLAGS=(--enable-sudo --disable-firewall)
-readonly SCRIPT_COMMANDS=(shell create slot slots revoke profiles projects profile info help -h --help add remove install allowlist clean save project tmux kill)
+# Four flag buckets (Bash 3.2 compatible - no associative arrays)
+HOST_ONLY_FLAGS=(--verbose rebuild)
+CONTROL_FLAGS=(--enable-sudo --disable-firewall)
+SCRIPT_COMMANDS=(shell create slot slots revoke profiles projects profile info help -h --help add remove install allowlist clean save project tmux kill)
 
 # parse_cli_args - Central CLI parsing with four-bucket architecture
 # Usage: parse_cli_args "$@"
 # Sets global variables:
 #   host_flags: Array of host-only flags (help, version, etc)
 #   control_flags: Array of control flags (verbose, enable-sudo, etc)
-#   script_command: Single command for ClaudeBox to execute
+#   script_command: Single command for ClaudeCircle to execute
 #   pass_through: Array of args to pass to Claude in container
 # Note: Each argument goes into exactly ONE bucket - no duplication
 parse_cli_args() {
@@ -31,33 +32,66 @@ parse_cli_args() {
     # Single parsing loop - each arg goes into exactly ONE bucket
     local found_script_command=false
     
-    for arg in "${all_args[@]}"; do
-        if [[ " ${HOST_ONLY_FLAGS[*]} " == *" $arg "* ]]; then
-            # Bucket 1: Host-only flags
-            host_flags+=("$arg")
-        elif [[ " ${CONTROL_FLAGS[*]} " == *" $arg "* ]]; then
-            # Bucket 2: Control flags (pass to container)
-            control_flags+=("$arg")
-        elif [[ "$found_script_command" == "false" ]] && [[ " ${SCRIPT_COMMANDS[*]} " == *" $arg "* ]]; then
-            # Bucket 3: Script commands (first one wins)
-            script_command="$arg"
-            found_script_command=true
-        else
-            # Bucket 4: Pass-through (everything else)
-            pass_through+=("$arg")
+    for arg in "${all_args[@]:-}"; do
+        # Check for host flags
+        local is_host=false
+        for flag in "${HOST_ONLY_FLAGS[@]}"; do
+            if [[ "$arg" == "$flag" ]]; then
+                host_flags+=("$arg")
+                is_host=true
+                break
+            fi
+        done
+        [[ "$is_host" == "true" ]] && continue
+
+        # Check for control flags
+        local is_control=false
+        for flag in "${CONTROL_FLAGS[@]}"; do
+            if [[ "$arg" == "$flag" ]]; then
+                control_flags+=("$arg")
+                is_control=true
+                break
+            fi
+        done
+        [[ "$is_control" == "true" ]] && continue
+
+        # Check for script command (first one wins)
+        if [[ "$found_script_command" == "false" ]]; then
+            local is_cmd=false
+            for cmd in "${SCRIPT_COMMANDS[@]}"; do
+                if [[ "$arg" == "$cmd" ]]; then
+                    script_command="$arg"
+                    found_script_command=true
+                    is_cmd=true
+                    break
+                fi
+            done
+            [[ "$is_cmd" == "true" ]] && continue
         fi
+
+        # Pass-through (everything else)
+        pass_through+=("$arg")
     done
     
-    # Export results for use by main script
-    export CLI_HOST_FLAGS=("${host_flags[@]}")
-    export CLI_CONTROL_FLAGS=("${control_flags[@]}")
-    export CLI_SCRIPT_COMMAND="$script_command"
-    export CLI_PASS_THROUGH=("${pass_through[@]}")
+    # Set global variables (do not export arrays as it is not portable)
+    CLI_HOST_FLAGS=("${host_flags[@]:-}")
+    CLI_CONTROL_FLAGS=("${control_flags[@]:-}")
+    CLI_SCRIPT_COMMAND="$script_command"
+    CLI_PASS_THROUGH=("${pass_through[@]:-}")
+    
+    export CLI_SCRIPT_COMMAND
+    
+    # Debug output
+    if [[ "${VERBOSE:-false}" == "true" ]] || [[ "${DEBUG_CI:-false}" == "true" ]]; then
+        echo "[DEBUG] parse_cli_args input: $*" >&2
+        echo "[DEBUG] script_command: $script_command" >&2
+        echo "[DEBUG] found_script_command: $found_script_command" >&2
+    fi
 }
 
 # Process host-only flags and set environment variables
 process_host_flags() {
-    for flag in "${CLI_HOST_FLAGS[@]}"; do
+    for flag in "${CLI_HOST_FLAGS[@]:-}"; do
         case "$flag" in
             --verbose)
                 export VERBOSE=true
@@ -66,7 +100,7 @@ process_host_flags() {
                 export REBUILD=true
                 ;;
             tmux)
-                export CLAUDEBOX_WRAP_TMUX=true
+                export CLAUDECIRCLE_WRAP_TMUX=true
                 ;;
         esac
     done

@@ -1,8 +1,8 @@
-# ClaudeBox CLI Implementation
+# ClaudeCircle CLI Implementation
 
 ## Overview
 
-The ClaudeBox CLI now uses a clean four-bucket architecture that parses all arguments in a single location, eliminating the previous scattered parsing and unpredictable behavior.
+The ClaudeCircle CLI now uses a clean four-bucket architecture that parses all arguments in a single location, eliminating the previous scattered parsing and unpredictable behavior.
 
 ## Architecture
 
@@ -120,19 +120,19 @@ Test the implementation with various flag combinations:
 
 ```bash
 # Basic commands
-claudebox --verbose help
-claudebox rebuild shell
-claudebox --enable-sudo shell
-claudebox tmux shell
+claudecircle --verbose help
+claudecircle rebuild shell
+claudecircle --enable-sudo shell
+claudecircle tmux shell
 
 # Combined flags
-claudebox --verbose rebuild shell
-claudebox --verbose --enable-sudo --disable-firewall shell
+claudecircle --verbose rebuild shell
+claudecircle --verbose --enable-sudo --disable-firewall shell
 
 # Pass-through to Claude
-claudebox --verbose chat "Hello"
-claudebox update
-claudebox config set theme dark
+claudecircle --verbose chat "Hello"
+claudecircle update
+claudecircle config set theme dark
 ```
 
 ## Migration Notes

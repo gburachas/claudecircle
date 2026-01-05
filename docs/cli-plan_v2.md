@@ -1,13 +1,13 @@
 Below is the **complete, self-contained CLI spec**—no gaps or second “full” parser in the entrypoint. It shows:
 
 1. **Four flag buckets**
-2. **One unified Bash 3.2–compatible parser + dispatcher** in `claudebox.sh`
+2. **One unified Bash 3.2–compatible parser + dispatcher** in `claudecircle.sh`
 3. **Minimal entrypoint handling** of only the **Control** flags
 4. A **full three-bucket flag table** for every switch
 
 ---
 
-# ClaudeBox CLI: Single Parser + Minimal Entrypoint
+# ClaudeCircle CLI: Single Parser + Minimal Entrypoint
 
 ## 1. Four Buckets
 
@@ -27,7 +27,7 @@ PASS_THROUGH=()
 
 ---
 
-## 2. Unified Parser & Dispatcher (`claudebox.sh`)
+## 2. Unified Parser & Dispatcher (`claudecircle.sh`)
 
 ```bash
 #!/usr/bin/env bash
@@ -36,13 +36,13 @@ PASS_THROUGH=()
 main() {
   # A) Globals
   export PROJECT_DIR="$(pwd)"
-  IMAGE_NAME="claudebox-$(basename "$PROJECT_DIR")"
+  IMAGE_NAME="claudecircle-$(basename "$PROJECT_DIR")"
 
   # B) Load default flags
   DEFAULT_FLAGS=()
-  if [[ -f "$HOME/.claudebox/default-flags" ]]; then
+  if [[ -f "$HOME/.claudecircle/default-flags" ]]; then
     while IFS= read -r f; do [[ -n $f ]] && DEFAULT_FLAGS+=("$f"); done \
-      < "$HOME/.claudebox/default-flags"
+      < "$HOME/.claudecircle/default-flags"
   fi
 
   # C) Buckets setup
@@ -147,7 +147,7 @@ exec claude "${CLAUDE_ARGS[@]}"
 > **Note:**
 >
 > * There is **no second full parser** in the entrypoint—only a tiny `case` on the two Control flags.
-> * **All** other flags/commands were handled and classified by `claudebox.sh` before `docker run`, so the entrypoint never needs to re-parse anything beyond `--enable-sudo / --disable-firewall`.
+> * **All** other flags/commands were handled and classified by `claudecircle.sh` before `docker run`, so the entrypoint never needs to re-parse anything beyond `--enable-sudo / --disable-firewall`.
 
 ---
 

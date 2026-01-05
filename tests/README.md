@@ -1,6 +1,6 @@
-# ClaudeBox Tests
+# ClaudeCircle Tests
 
-This directory contains test scripts to verify ClaudeBox compatibility across different Bash versions.
+This directory contains test scripts to verify ClaudeCircle compatibility across different Bash versions.
 
 ## Test Scripts
 
@@ -39,7 +39,7 @@ The test suite covers:
    - `profile_exists()`
 
 2. **Usage Patterns**
-   - Profile listing (as used in `claudebox profiles`)
+   - Profile listing (as used in `claudecircle profiles`)
    - Dockerfile generation patterns
    - Empty profile handling
    - Invalid profile handling
