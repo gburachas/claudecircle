@@ -22,7 +22,7 @@ The Ultimate Claude Code Docker Development Environment - Run Claude AI's coding
  ╚═════╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═════╝
 ```
 
-## 🚀 What's New in ClaudeCircle (v2.0.0)
+## 🚀 What's New in ClaudeCircle (v0.2)
 
 ClaudeCircle is the next evolution of ClaudeBox, featuring:
 
