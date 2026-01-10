@@ -9,6 +9,20 @@ check_docker() {
     return 0
 }
 
+# Network for A2A communication
+CLAUDECIRCLE_NETWORK="claudecircle-net"
+
+# Ensure shared network exists for inter-container A2A communication
+ensure_claudecircle_network() {
+    if ! docker network inspect "$CLAUDECIRCLE_NETWORK" >/dev/null 2>&1; then
+        info "Creating shared network: $CLAUDECIRCLE_NETWORK"
+        docker network create \
+            --driver bridge \
+            --subnet 172.28.0.0/16 \
+            "$CLAUDECIRCLE_NETWORK" >/dev/null
+    fi
+}
+
 install_docker() {
     warn "Docker is not installed."
     cecho "Would you like to install Docker now? (y/n)" "$CYAN"
