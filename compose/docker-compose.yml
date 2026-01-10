@@ -1,0 +1,109 @@
+# ClaudeCircle Multi-Agent Docker Compose
+# 
+# Usage:
+#   docker-compose up -d                    # Start all domains
+#   docker-compose up -d dev marketing      # Start specific domains
+#   docker-compose --profile dev up -d      # Start dev profile only
+#
+# Network: All containers connect to claudecircle-net for A2A communication
+
+version: '3.8'
+
+networks:
+  claudecircle-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+x-common-config: &common-config
+  restart: unless-stopped
+  networks:
+    - claudecircle-net
+  environment:
+    - NODE_ENV=production
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    - A2A_PORT=8080
+  volumes:
+    - ${PROJECT_DIR:-.}:/workspace
+  working_dir: /workspace
+  cap_add:
+    - NET_ADMIN
+    - NET_RAW
+
+services:
+  # Development Domain
+  # Agents: planner, coder, reviewer, liaison
+  dev:
+    <<: *common-config
+    image: claudecircle-${PROJECT_NAME:-default}
+    container_name: claudecircle-dev
+    hostname: claudecircle-dev
+    profiles:
+      - dev
+      - all
+    environment:
+      - AGENT_DOMAIN=dev
+      - CLAUDECIRCLE_DOMAIN=dev
+    volumes:
+      - ${PROJECT_DIR:-.}:/workspace
+      - ${HOME}/.claudecircle/dev:/home/claude/.claude
+    ports:
+      - "8081:8080"
+
+  # Marketing Domain  
+  # Agents: marketing, sales, liaison
+  marketing:
+    <<: *common-config
+    image: claudecircle-${PROJECT_NAME:-default}
+    container_name: claudecircle-marketing
+    hostname: claudecircle-marketing
+    profiles:
+      - marketing
+      - all
+    environment:
+      - AGENT_DOMAIN=marketing
+      - CLAUDECIRCLE_DOMAIN=marketing
+    volumes:
+      - ${PROJECT_DIR:-.}:/workspace
+      - ${HOME}/.claudecircle/marketing:/home/claude/.claude
+    ports:
+      - "8082:8080"
+
+  # Operations Domain
+  # Agents: devops, monitor, liaison
+  ops:
+    <<: *common-config
+    image: claudecircle-${PROJECT_NAME:-default}
+    container_name: claudecircle-ops
+    hostname: claudecircle-ops
+    profiles:
+      - ops
+      - all
+    environment:
+      - AGENT_DOMAIN=ops
+      - CLAUDECIRCLE_DOMAIN=ops
+    volumes:
+      - ${PROJECT_DIR:-.}:/workspace
+      - ${HOME}/.claudecircle/ops:/home/claude/.claude
+    ports:
+      - "8083:8080"
+
+  # Executive Domain
+  # Agents: ceo, cfo, cto, liaison
+  cxo:
+    <<: *common-config
+    image: claudecircle-${PROJECT_NAME:-default}
+    container_name: claudecircle-cxo
+    hostname: claudecircle-cxo
+    profiles:
+      - cxo
+      - all
+    environment:
+      - AGENT_DOMAIN=cxo
+      - CLAUDECIRCLE_DOMAIN=cxo
+    volumes:
+      - ${PROJECT_DIR:-.}:/workspace
+      - ${HOME}/.claudecircle/cxo:/home/claude/.claude
+    ports:
+      - "8084:8080"

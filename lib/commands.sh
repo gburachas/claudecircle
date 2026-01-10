@@ -64,6 +64,13 @@ source "${LIB_DIR}/commands.clean.sh"
 source "${LIB_DIR}/commands.system.sh"
 
 # ============================================================================
+# COMPOSE COMMANDS - Multi-agent Docker orchestration
+# ============================================================================
+# Commands: compose init, compose up, compose down, compose status, compose logs
+# - compose: Multi-container orchestration for agent domains
+source "${LIB_DIR}/commands.compose.sh"
+
+# ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
@@ -297,6 +304,9 @@ dispatch_command() {
         project)          _cmd_project "$@" ;;
         import)           _cmd_import "$@" ;;
         kill)             _cmd_kill "$@" ;;
+        
+        # Compose commands (multi-agent orchestration)
+        compose)          _cmd_compose "$@" ;;
         
         # Special commands that modify container
         config|mcp|migrate-installer) 
