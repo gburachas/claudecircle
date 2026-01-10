@@ -474,6 +474,7 @@ claudecircle
 
 ## 🎉 Acknowledgments
 
+- [RchGrav](@RchGrav) for ClaudeBox
 - [Anthropic](https://www.anthropic.com/) for Claude AI
 - [Model Context Protocol](https://github.com/anthropics/model-context-protocol) for MCP servers
 - Docker community for containerization tools
@@ -485,5 +486,5 @@ Made with ❤️ for developers who love clean, reproducible environments
 
 ## Contact
 
-**Author/Maintainer:** RchGrav  
-**GitHub:** [@RchGrav](https://github.com/RchGrav)
+**Author/Maintainer:** GDRS  
+**GitHub:** [@GDRS](https://github.com/gburachas)
