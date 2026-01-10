@@ -96,8 +96,8 @@ Please cd to a project directory first."
             fi
             ;;
             
-        # Tmux - skip pre-flight entirely, it handles its own validation
-        tmux)
+        # Tmux and compose - skip pre-flight entirely, they handle their own validation
+        tmux|compose)
             return 0
             ;;
             
